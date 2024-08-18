@@ -1,0 +1,117 @@
+inherit_from: .rubocop_todo.yml
+
+require:
+  - rubocop-performance
+  - rubocop-rails
+  - rubocop-rspec
+
+AllCops:
+  NewCops: disable
+  SuggestExtensions: false
+  TargetRubyVersion: 3.1.2
+  TargetRailsVersion: 7.0.2.4
+  Exclude:
+    - "**/Gemfile.lock"
+    - "**/Rakefile"
+    - "**/rails"
+    - "**/spec_helper.rb"
+    - "**/vendor/**/*"
+    - "bin/*"
+    - "db/migrate/*.rb"
+    - "db/schema.rb"
+
+Lint/AmbiguousBlockAssociation:
+  Exclude:
+    - spec/**/*_spec.rb
+
+Layout/FirstArrayElementIndentation:
+  EnforcedStyle: consistent
+
+Layout/FirstHashElementIndentation:
+  EnforcedStyle: consistent
+
+Layout/MultilineMethodCallIndentation:
+  EnforcedStyle: indented
+
+Metrics:
+  Enabled: false
+
+Metrics/BlockLength:
+  Exclude:
+    - spec/**/*_spec.rb
+
+Naming/VariableNumber:
+  Enabled: false
+
+Rails/HasManyOrHasOneDependent:
+  Enabled: false
+
+Rails/HasAndBelongsToMany:
+  Enabled: false
+
+RSpec/DescribeClass:
+  Enabled: false
+
+RSpec/ExampleLength:
+  Enabled: false
+
+RSpec/MessageChain:
+  Enabled: false
+
+RSpec/MultipleExpectations:
+  Enabled: false
+
+RSpec/LetSetup:
+  Enabled: false
+
+RSpec/MultipleSubjects:
+  Enabled: false
+
+RSpec/SubjectStub:
+  Enabled: false
+
+Style/AndOr:
+  EnforcedStyle: conditionals
+
+Style/ClassAndModuleChildren:
+  Enabled: false
+
+RSpec/MultipleMemoizedHelpers:
+  Enabled: false
+
+Style/CommentedKeyword:
+  Enabled: false
+
+Style/Documentation:
+  Enabled: false
+
+Style/DoubleNegation:
+  Enabled: false
+
+Style/Lambda:
+  EnforcedStyle: literal
+
+Style/MethodCallWithArgsParentheses:
+  Exclude:
+    - bin/**/*
+    - config.ru
+    - Gemfile
+  Enabled: true
+  IgnoreMacros: true
+  IgnoredMethods:
+    - and
+    - can
+    - describe
+    - head
+    - helper_method
+    - not_to
+    - puts
+    - redirect_to
+    - render
+    - require
+    - require_relative
+    - require_dependency
+    - raise
+    - sleep
+    - to
+    - yield
