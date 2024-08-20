@@ -14,5 +14,7 @@ group :development, :test do
   gem 'debug', platforms: %i[mri mswin mswin64 mingw x64_mingw], require: 'debug/prelude'
   gem 'factory_bot_rails'
   gem 'rspec-rails', '~> 6.0'
+  gem 'rubocop', require: false
   gem 'rubocop-rails-omakase', require: false
+  gem 'rubocop-rspec', require: false
 end
