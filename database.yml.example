@@ -1,0 +1,25 @@
+default: &default
+  adapter: postgresql
+  encoding: unicode
+  <% if ENV['DATABASE_HOST'].present? %>
+  host: <%= ENV.fetch('DATABASE_HOST', 'localhost')%>
+  <% end %>
+  pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
+  <% if ENV['DATABASE_USERNAME'].present? %>
+  username: <%= ENV['DATABASE_USERNAME'] %>
+  password: <%= ENV['DATABASE_PASSWORD'] %>
+  <% end %>
+
+development:
+  <<: *default
+  database: portal_api_development
+
+test:
+  <<: *default
+  database: portal_api_test
+
+production:
+  <<: *default
+  database: portal_api_production
+  username: portal_api
+  password: <%= ENV["PORTAL_API_DATABASE_PASSWORD"] %>
