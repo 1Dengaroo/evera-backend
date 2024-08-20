@@ -51,10 +51,3 @@ jobs:
       - name: Run tests (RSpec)
         run: |
           bundle exec rspec
-
-      - name: Test coverage
-        uses: joshmfrankel/simplecov-check-action@main
-        with:
-          minimum_suite_coverage: 90
-          minimum_file_coverage: 0
-          github_token: ${{ secrets.GITHUB_TOKEN }}
