@@ -4,6 +4,10 @@ class Api::V1::OrdersController < ApplicationController
   require 'stripe'
 
   def create
+    # Potential flow
+    # create payent intent object
+    # create order object and link to payment intent
+    # 
     Stripe.api_key = ENV['STRIPE_API_KEY']
 
     amount_in_cents = (ProductsService::CalculateCartTotal.call(params[:items]) * 100).to_i

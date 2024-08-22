@@ -20,6 +20,12 @@ Rails.application.routes.draw do
           get 'stripe_public_key'
         end
       end
+
+      resources :webhooks, only: [] do
+        collection do
+          post 'stripe'
+        end
+      end
     end
   end
 end
