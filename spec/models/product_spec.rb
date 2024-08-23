@@ -85,4 +85,15 @@ RSpec.describe Product, type: :model do
       expect(product.errors[:sizes]).to include('InvalidSize is not a valid size')
     end
   end
+
+  describe 'associations' do
+    it 'has many order_items' do
+      order = create(:order)
+      product = create(:product)
+      order_item1 = create(:order_item, order:, product:)
+      order_item2 = create(:order_item, order:, product:)
+
+      expect(product.order_items).to include(order_item1, order_item2)
+    end
+  end
 end

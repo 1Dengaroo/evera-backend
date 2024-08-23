@@ -1,32 +1,27 @@
 # frozen_string_literal: true
 
 class Api::V1::OrdersController < ApplicationController
-  require 'stripe'
-
   def create
-    # Potential flow
-    # create payent intent object
-    # create order object and link to payment intent
-    # 
-    Stripe.api_key = ENV['STRIPE_API_KEY']
-
-    amount_in_cents = (ProductsService::CalculateCartTotal.call(params[:items]) * 100).to_i
+    permitted_items = params.require(:items).map { |item| item.permit(:id, :quantity).to_h }
+    amount_in_cents = (ProductsService::CalculateCartTotal.call(permitted_items) * 100).to_i
+    email = 'example@email.com'
 
     begin
-      payment_intent = Stripe::PaymentIntent.create({
-        amount: amount_in_cents,
-        receipt_email: 'b@b.com',
-        currency: 'usd',
-        automatic_payment_methods: {
-          enabled: true
-        }
-      })
+      session = OrdersService::StripePayment.new(email:, items: permitted_items).create_checkout_session
 
-      render json: { client_secret: payment_intent.client_secret }
-    rescue Stripe::CardError => e
-      render json: { error: e.message }, status: :payment_required
-    rescue Stripe::InvalidRequestError => e
+      OrdersService::CreateOrder.call(
+        email:,
+        checkout_session_id: session.id,
+        amount_in_cents:,
+        items: permitted_items
+      )
+
+      render json: { session_id: session.id }
+    rescue Stripe::StripeError => e
+      Rails.logger.debug(e)
       render json: { error: e.message }, status: :bad_request
+    rescue ActiveRecord::RecordNotFound => e
+      render json: { error: "Product not found: #{e.message}" }, status: :not_found
     end
   end
 end
