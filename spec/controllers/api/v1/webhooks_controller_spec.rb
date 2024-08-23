@@ -2,7 +2,7 @@
 
 require 'rails_helper'
 
-RSpec.describe Api::V1::WebhooksController, type: :controller do
+RSpec.describe WebhooksController, type: :controller do
   describe 'POST #stripe' do
     let(:valid_signature) { 'valid_signature' }
     let(:invalid_signature) { 'invalid_signature' }

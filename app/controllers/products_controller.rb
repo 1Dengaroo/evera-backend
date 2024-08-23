@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class Api::V1::ProductsController < ApplicationController
+class ProductsController < ApplicationController
   def index
     @products = Product.where(active: true)
     render json: @products
