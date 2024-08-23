@@ -2,7 +2,7 @@
 
 require 'rails_helper'
 
-RSpec.describe Api::V1::ProductsController, type: :controller do
+RSpec.describe ProductsController, type: :controller do
   let!(:active_product) { FactoryBot.create(:product, active: true) }
   let!(:inactive_product) { FactoryBot.create(:product, active: false) }
 

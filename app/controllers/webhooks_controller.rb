@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class Api::V1::WebhooksController < ApplicationController
+class WebhooksController < ApplicationController
   def stripe
     payload = request.body.read
     sig_header = request.env['HTTP_STRIPE_SIGNATURE']
