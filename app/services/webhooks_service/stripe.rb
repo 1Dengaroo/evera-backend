@@ -4,12 +4,11 @@ module WebhooksService
   class Stripe
     def self.cs_completed(event)
       session = event['data']['object']
-      session['customer_email']
 
       order = Order.find_by(checkout_session_id: session.id)
       return unless order
 
-      order.update(completed: true)
+      order.update(completed: true, email: session['customer_details']['email'])
 
       order.order_items.each do |item|
         product = item.product

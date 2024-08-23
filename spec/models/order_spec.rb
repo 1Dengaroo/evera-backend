@@ -8,14 +8,9 @@ RSpec.describe Order, type: :model do
     expect(order).to be_valid
   end
 
-  it 'is not valid without an email' do
+  it 'is valid without an email' do
     order = build(:order, email: nil)
-    expect(order).not_to be_valid
-  end
-
-  it 'is not valid with an invalid email format' do
-    order = build(:order, email: 'invalid_email')
-    expect(order).not_to be_valid
+    expect(order).to be_valid
   end
 
   it 'is not valid without a checkout_session_id' do

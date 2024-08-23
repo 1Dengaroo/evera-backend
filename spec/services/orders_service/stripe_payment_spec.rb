@@ -3,14 +3,13 @@
 require 'rails_helper'
 
 RSpec.describe OrdersService::StripePayment do
-  let(:email) { 'test@example.com' }
   let(:items) do
     [
       { 'id' => 1, 'quantity' => 2 },
       { 'id' => 2, 'quantity' => 1 }
     ]
   end
-  let(:service) { described_class.new(email:, items:) }
+  let(:service) { described_class.new(items:) }
 
   before do
     checkout_session_double = double('Stripe::Checkout::Session', id: 'cs_1GqIC8XnYozEGLjpCz7iRjz8') # rubocop:disable RSpec/VerifiedDoubles
@@ -51,7 +50,10 @@ RSpec.describe OrdersService::StripePayment do
           mode: 'payment',
           success_url: 'http://localhost:3000/success?session_id={CHECKOUT_SESSION_ID}',
           cancel_url: 'http://localhost:3000/cancel',
-          customer_email: email
+          billing_address_collection: 'required',
+          shipping_address_collection: {
+            allowed_countries: %w[US CA]
+          }
         )
         expect(checkout_session.id).to eq('cs_1GqIC8XnYozEGLjpCz7iRjz8')
       end

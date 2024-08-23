@@ -3,7 +3,6 @@
 require 'rails_helper'
 
 RSpec.describe OrdersService::CreateOrder, type: :service do
-  let(:email) { 'example@email.com' }
   let(:checkout_session_id) { 'cs_123' }
   let(:amount_in_cents) { 5000 }
   let(:product_one) { create(:product, price: 10.00) }
@@ -19,7 +18,6 @@ RSpec.describe OrdersService::CreateOrder, type: :service do
     it 'creates an order and order items' do
       expect do
         described_class.call(
-          email:,
           checkout_session_id:,
           amount_in_cents:,
           items:
@@ -28,7 +26,7 @@ RSpec.describe OrdersService::CreateOrder, type: :service do
         .and change(OrderItem, :count).by(2)
 
       order = Order.last
-      expect(order.email).to eq(email)
+      expect(order.email).to be_nil
       expect(order.checkout_session_id).to eq(checkout_session_id)
       expect(order.price).to eq(amount_in_cents)
       expect(order.completed).to be_falsey
@@ -47,7 +45,6 @@ RSpec.describe OrdersService::CreateOrder, type: :service do
 
       expect do
         described_class.call(
-          email:,
           checkout_session_id:,
           amount_in_cents:,
           items: invalid_items
