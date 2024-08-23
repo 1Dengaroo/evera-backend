@@ -8,7 +8,7 @@ module WebhooksService
       order = Order.find_by(checkout_session_id: session.id)
       return unless order
 
-      order.update(completed: true, email: session['customer_details']['email'])
+      order.update(paid: true, email: session['customer_details']['email'])
 
       order.order_items.each do |item|
         product = item.product

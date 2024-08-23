@@ -29,7 +29,7 @@ RSpec.describe OrdersService::CreateOrder, type: :service do
       expect(order.email).to be_nil
       expect(order.checkout_session_id).to eq(checkout_session_id)
       expect(order.price).to eq(amount_in_cents)
-      expect(order.completed).to be_falsey
+      expect(order.paid).to be_falsey
 
       order_item1 = order.order_items.find_by(product: product_one)
       order_item2 = order.order_items.find_by(product: product_two)
