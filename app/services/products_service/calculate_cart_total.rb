@@ -5,7 +5,9 @@ module ProductsService
     def self.call(items)
       total = 0
       items.each do |item|
-        product = Product.find(item['id'])
+        product = Product.find_by(id: item['id'], active: true)
+        raise ActiveRecord::RecordNotFound, "Product not found: #{item}" unless product
+
         total += product.price * item['quantity']
       end
       total

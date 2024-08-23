@@ -10,9 +10,28 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2024_08_19_154928) do
+ActiveRecord::Schema[7.2].define(version: 2024_08_23_180714) do
   # These are extensions that must be enabled in order to support this database
+  enable_extension "pgcrypto"
   enable_extension "plpgsql"
+
+  create_table "order_items", force: :cascade do |t|
+    t.bigint "product_id", null: false
+    t.integer "quantity"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.uuid "order_id"
+    t.index ["product_id"], name: "index_order_items_on_product_id"
+  end
+
+  create_table "orders", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "email"
+    t.string "checkout_session_id"
+    t.boolean "completed"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "price"
+  end
 
   create_table "products", force: :cascade do |t|
     t.string "name", null: false
@@ -27,4 +46,7 @@ ActiveRecord::Schema[7.2].define(version: 2024_08_19_154928) do
     t.string "sizes", default: ["XS", "S", "M", "L", "XL", "XXL"], array: true
     t.integer "quantity", default: 0
   end
+
+  add_foreign_key "order_items", "orders"
+  add_foreign_key "order_items", "products"
 end
