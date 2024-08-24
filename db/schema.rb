@@ -10,10 +10,36 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2024_08_23_200314) do
+ActiveRecord::Schema[7.2].define(version: 2024_08_24_022722) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
+
+  create_table "addresses", force: :cascade do |t|
+    t.string "city", null: false
+    t.string "country", null: false
+    t.string "line1", null: false
+    t.string "line2"
+    t.string "postal_code", null: false
+    t.string "state", null: false
+    t.string "name", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "deliveries", force: :cascade do |t|
+    t.string "email", null: false
+    t.string "status", default: "manufacturing", null: false
+    t.string "tracking_information"
+    t.string "session_id", null: false
+    t.uuid "order_id", null: false
+    t.bigint "address_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["address_id"], name: "index_deliveries_on_address_id"
+    t.index ["order_id"], name: "index_deliveries_on_order_id"
+    t.index ["session_id"], name: "index_deliveries_on_session_id", unique: true
+  end
 
   create_table "order_items", force: :cascade do |t|
     t.bigint "product_id", null: false
@@ -47,6 +73,8 @@ ActiveRecord::Schema[7.2].define(version: 2024_08_23_200314) do
     t.integer "quantity", default: 0
   end
 
+  add_foreign_key "deliveries", "addresses"
+  add_foreign_key "deliveries", "orders"
   add_foreign_key "order_items", "orders"
   add_foreign_key "order_items", "products"
 end
