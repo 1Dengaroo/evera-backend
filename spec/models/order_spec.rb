@@ -26,4 +26,20 @@ RSpec.describe Order, type: :model do
 
     expect(order.order_items).to include(order_item1, order_item2)
   end
+
+  it 'has one delivery' do
+    order = create(:order)
+    address = create(:address)
+    delivery = create(:delivery, order:, address:)
+
+    expect(order.delivery).to eq(delivery)
+  end
+
+  it 'destroys associated delivery when order is destroyed' do
+    order = create(:order)
+    address = create(:address)
+    create(:delivery, order:, address:)
+
+    expect { order.destroy }.to change(Delivery, :count).by(-1)
+  end
 end
