@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 Rails.application.routes.draw do
+  # Devise routes for user authentication
   devise_for :users, path: '', path_names: {
                                  sign_in: 'login',
                                  sign_out: 'logout',
@@ -11,7 +12,7 @@ Rails.application.routes.draw do
                        registrations: 'users/registrations'
                      }
 
-  get 'orders/create'
+  # Product routes
   resources :products, only: %i[index show] do
     member do
       get 'price_by_id'
@@ -21,14 +22,17 @@ Rails.application.routes.draw do
     end
   end
 
-  resources :orders, only: [:create]
+  # Order routes
+  resources :orders, only: %i[create index]
 
+  # Configuration routes
   resources :configurations do
     collection do
       get 'stripe_public_key'
     end
   end
 
+  # Webhook routes
   resources :webhooks, only: [] do
     collection do
       post 'stripe'
