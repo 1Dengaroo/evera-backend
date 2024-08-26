@@ -3,6 +3,14 @@
 require 'rails_helper'
 
 RSpec.describe OrdersController, type: :controller do
+  include Devise::Test::ControllerHelpers
+
+  let(:user) { create(:user) }
+
+  before do
+    sign_in user
+  end
+
   describe 'POST #create' do
     let(:items) do
       [
@@ -16,6 +24,7 @@ RSpec.describe OrdersController, type: :controller do
     let(:amount_in_cents) { 2000 }
     let(:checkout_session_id) { 'cs_1GqIC8XnYozEGLjpCz7iRjz8' }
     let(:checkout_session) { double('Stripe::Checkout::Session', id: checkout_session_id) } # rubocop:disable RSpec/VerifiedDoubles
+    let(:order) { instance_double(Order, id: 123, update!: true) }
 
     before do
       allow(ProductsService::CalculateCartTotal).to receive(:call).with(permitted_items).and_return(20.0)
@@ -24,7 +33,7 @@ RSpec.describe OrdersController, type: :controller do
       allow(OrdersService::StripePayment).to receive(:new).with(items: permitted_items).and_return(stripe_payment_instance)
       allow(stripe_payment_instance).to receive(:create_checkout_session).and_return(checkout_session)
 
-      allow(OrdersService::CreateOrder).to receive(:call)
+      allow(OrdersService::CreateOrder).to receive(:call).and_return(order)
     end
 
     context 'when the request is successful' do
