@@ -22,4 +22,9 @@ class ProductsController < ApplicationController
 
     render json: { total: @total }
   end
+
+  def front_page_products
+    @products = Product.where(active: true).order(created_at: :desc).limit(4)
+    render json: @products
+  end
 end

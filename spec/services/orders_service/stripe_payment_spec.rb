@@ -48,8 +48,8 @@ RSpec.describe OrdersService::StripePayment do
             }
           ],
           mode: 'payment',
-          success_url: 'http://localhost:3000/success?session_id={CHECKOUT_SESSION_ID}',
-          cancel_url: 'http://localhost:3000/cancel',
+          success_url: 'http://localhost:3000/orders/success?session_id={CHECKOUT_SESSION_ID}',
+          cancel_url: 'http://localhost:3000/orders/cancel',
           billing_address_collection: 'required',
           shipping_address_collection: {
             allowed_countries: %w[US CA]
