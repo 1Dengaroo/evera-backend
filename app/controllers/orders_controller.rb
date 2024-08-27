@@ -2,6 +2,7 @@
 
 class OrdersController < ApplicationController
   before_action :authenticate_user!, only: [:index]
+  before_action :authenticate_admin!, only: %i[admin_index update]
 
   def create
     permitted_items = params.require(:items).map { |item| item.permit(:id, :quantity).to_h }
@@ -27,8 +28,52 @@ class OrdersController < ApplicationController
 
   def index
     @orders = current_user.orders.where(paid: true).order(created_at: :desc)
+    render json: @orders.as_json(orders_json_options)
+  end
 
-    render json: @orders.as_json(
+  def track_order
+    @order = Order.find_by!(id: params[:id])
+    render json: @order.as_json(orders_json_options)
+  rescue ActiveRecord::RecordNotFound
+    render json: { error: 'Order not found' }, status: :not_found
+  end
+
+  def admin_index
+    @orders = Order.where(paid: true).order(created_at: :desc)
+
+    @orders = @orders.joins(:user).where(users: { email: params[:email] }) if params[:email].present?
+    @orders = @orders.joins(:delivery).where(deliveries: { status: params[:status] }) if params[:status].present?
+    @orders = @orders.where(id: params[:id]) if params[:id].present?
+
+    render json: @orders.as_json(orders_json_options)
+  end
+
+  def update
+    @order = Order.find_by(id: params[:id])
+    delivery_params = order_update_params[:delivery_attributes]
+
+    delivery_params = @order.delivery.attributes.symbolize_keys.merge(delivery_params)
+
+    if @order.update(order_update_params.merge(delivery_attributes: delivery_params))
+      render json: @order.as_json(orders_json_options)
+    else
+      render json: { error: @order.errors.full_messages.to_sentence }, status: :unprocessable_entity
+    end
+  end
+
+  def success
+    @order = Order.find_by(checkout_session_id: params[:session_id])
+    if @order
+      render json: @order.as_json(orders_json_options)
+    else
+      render json: { error: 'Order not found' }, status: :not_found
+    end
+  end
+
+  private
+
+  def orders_json_options
+    {
       only: %i[id email paid price created_at updated_at],
       include: {
         order_items: {
@@ -48,6 +93,28 @@ class OrdersController < ApplicationController
           }
         }
       }
+    }
+  end
+
+  def authenticate_admin!
+    render json: { error: 'Unauthorized access' }, status: :forbidden unless !current_user.nil? && current_user.admin?
+  end
+
+  def order_update_params
+    params.require(:order).permit(
+      delivery_attributes: [
+        :status,
+        :tracking_information,
+        { address_attributes: %i[
+          name
+          line1
+          line2
+          city
+          state
+          postal_code
+          country
+        ] }
+      ]
     )
   end
 end

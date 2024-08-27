@@ -9,7 +9,8 @@ Rails.application.routes.draw do
                                },
                      controllers: {
                        sessions: 'users/sessions',
-                       registrations: 'users/registrations'
+                       registrations: 'users/registrations',
+                       passwords: 'users/passwords'
                      }
 
   # Product routes
@@ -19,11 +20,20 @@ Rails.application.routes.draw do
     end
     collection do
       post 'cart_total'
+      get 'front_page_products'
     end
   end
 
   # Order routes
-  resources :orders, only: %i[create index]
+  resources :orders, only: %i[index create update] do
+    collection do
+      get :admin_index
+      get :success
+    end
+    member do
+      get :track_order
+    end
+  end
 
   # Configuration routes
   resources :configurations do
