@@ -5,7 +5,7 @@ module WebhooksService
     def self.cs_completed(event)
       session = event['data']['object']
 
-      order = Order.find_by(checkout_session_id: session.id)
+      order = Order.find_by(checkout_session_id: session['id'])
       return unless order
 
       order.update(paid: true, email: session['customer_details']['email'])
@@ -29,8 +29,10 @@ module WebhooksService
       order.create_delivery!(
         email: session['customer_details']['email'],
         address:,
-        session_id: session.id
+        session_id: session['id']
       )
+
+      SendOrderConfirmationJob.perform_later(order.id)
     end
   end
 end

@@ -10,6 +10,7 @@ gem 'pg', '~> 1.1'
 gem 'puma', '>= 5.0'
 gem 'rack-cors'
 gem 'rails', '~> 7.2.0'
+gem 'sidekiq'
 gem 'sinatra'
 gem 'stripe'
 gem 'tzinfo-data', platforms: %i[mswin mswin64 mingw x64_mingw jruby]
