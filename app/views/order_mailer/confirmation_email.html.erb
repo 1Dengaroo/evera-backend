@@ -9,7 +9,12 @@
   <ul style="list-style-type: none; padding: 0; margin-bottom: 20px;">
     <% @order_items.each do |item| %>
       <li style="margin-bottom: 10px;">
-        <strong><%= item.product.name %></strong><br>
+        <strong>
+          <%= item.product.name %>
+          <% if item.size.present? %>
+            (<%= item.size %>)
+          <% end %>
+        </strong><br>
         Quantity: <%= item.quantity %><br>
         Price: $<%= item.product.price %>
       </li>

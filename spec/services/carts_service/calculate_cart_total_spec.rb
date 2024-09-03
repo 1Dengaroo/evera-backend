@@ -2,7 +2,7 @@
 
 require 'rails_helper'
 
-RSpec.describe ProductsService::CalculateCartTotal do
+RSpec.describe CartsService::CalculateCartTotal do
   describe '.call' do
     let(:product_one) { create(:product, id: 1, price: 10.00) }
     let(:product_two) { create(:product, id: 2, price: 15.00) }

@@ -9,7 +9,7 @@ RSpec.describe OrdersService::CreateOrder, type: :service do
   let(:product_two) { create(:product, price: 20.00) }
   let(:items) do
     [
-      { 'id' => product_one.id, 'quantity' => 2 },
+      { 'id' => product_one.id, 'quantity' => 2, 'size' => 'M' },
       { 'id' => product_two.id, 'quantity' => 1 }
     ]
   end
@@ -36,6 +36,9 @@ RSpec.describe OrdersService::CreateOrder, type: :service do
 
       expect(order_item1.quantity).to eq(2)
       expect(order_item2.quantity).to eq(1)
+
+      expect(order_item1.size).to eq('M')
+      expect(order_item2.size).to be_nil
     end
   end
 

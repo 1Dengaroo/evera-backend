@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module ProductsService
+module CartsService
   class CalculateCartTotal
     def self.call(items)
       total = 0

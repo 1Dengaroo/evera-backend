@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 
-# spec/services/webhooks_service/stripe_spec.rb
 require 'rails_helper'
 
 RSpec.describe WebhooksService::Stripe, type: :service do
