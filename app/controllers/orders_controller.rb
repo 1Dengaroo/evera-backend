@@ -9,7 +9,7 @@ class OrdersController < ApplicationController
     amount_in_cents = (CartsService::CalculateCartTotal.call(permitted_items) * 100).to_i
 
     begin
-      session = OrdersService::StripePayment.new(items: permitted_items).create_checkout_session
+      session = OrdersService::StripePayment.new(email: current_user&.email, items: permitted_items).create_checkout_session
       order = OrdersService::CreateOrder.call(
         checkout_session_id: session.id,
         amount_in_cents:,

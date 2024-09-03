@@ -26,18 +26,20 @@ RSpec.describe OrdersController, type: :controller do
     let(:checkout_session_id) { 'cs_1GqIC8XnYozEGLjpCz7iRjz8' }
     let(:checkout_session) { double('Stripe::Checkout::Session', id: checkout_session_id) } # rubocop:disable RSpec/VerifiedDoubles
     let(:order) { instance_double(Order, id: 123, update!: true) }
+    let(:user) { create(:user) }
 
-    before do
-      allow(CartsService::CalculateCartTotal).to receive(:call).with(permitted_items).and_return(20.0)
+    context 'when the request is successful and the user is logged in' do
+      before do
+        sign_in user
+        allow(CartsService::CalculateCartTotal).to receive(:call).with(permitted_items).and_return(20.0)
 
-      stripe_payment_instance = instance_double(OrdersService::StripePayment)
-      allow(OrdersService::StripePayment).to receive(:new).with(items: permitted_items).and_return(stripe_payment_instance)
-      allow(stripe_payment_instance).to receive(:create_checkout_session).and_return(checkout_session)
+        stripe_payment_instance = instance_double(OrdersService::StripePayment)
+        allow(OrdersService::StripePayment).to receive(:new).with(items: permitted_items, email: user.email).and_return(stripe_payment_instance)
+        allow(stripe_payment_instance).to receive(:create_checkout_session).and_return(checkout_session)
 
-      allow(OrdersService::CreateOrder).to receive(:call).and_return(order)
-    end
+        allow(OrdersService::CreateOrder).to receive(:call).and_return(order)
+      end
 
-    context 'when the request is successful' do
       it 'calculates the total amount in cents' do
         post :create, params: { items: }
 
@@ -47,8 +49,49 @@ RSpec.describe OrdersController, type: :controller do
       it 'creates a Stripe checkout session' do
         post :create, params: { items: }
 
-        expect(OrdersService::StripePayment).to have_received(:new).with(items: permitted_items)
-        expect(OrdersService::StripePayment.new(items: permitted_items)).to have_received(:create_checkout_session)
+        expect(OrdersService::StripePayment).to have_received(:new).with(items: permitted_items, email: user.email)
+        expect(OrdersService::StripePayment.new(items: permitted_items, email: user.email)).to have_received(:create_checkout_session)
+      end
+
+      it 'creates an order with the correct parameters' do
+        post :create, params: { items: }
+
+        expect(OrdersService::CreateOrder).to have_received(:call).with(
+          checkout_session_id:,
+          amount_in_cents:,
+          items: permitted_items
+        )
+      end
+
+      it 'returns the session ID in the response' do
+        post :create, params: { items: }
+
+        expect(response).to have_http_status(:ok)
+        expect(JSON.parse(response.body)).to eq({ 'session_id' => checkout_session_id })
+      end
+    end
+
+    context 'when the request is successful and the user is not logged in' do
+      before do
+        sign_out user
+        allow(CartsService::CalculateCartTotal).to receive(:call).with(permitted_items).and_return(20.0)
+        stripe_payment_instance = instance_double(OrdersService::StripePayment)
+        allow(OrdersService::StripePayment).to receive(:new).with(items: permitted_items, email: nil).and_return(stripe_payment_instance)
+        allow(stripe_payment_instance).to receive(:create_checkout_session).and_return(checkout_session)
+        allow(OrdersService::CreateOrder).to receive(:call).and_return(order)
+      end
+
+      it 'calculates the total amount in cents' do
+        post :create, params: { items: }
+
+        expect(CartsService::CalculateCartTotal).to have_received(:call).with(permitted_items)
+      end
+
+      it 'creates a Stripe checkout session' do
+        post :create, params: { items: }
+
+        expect(OrdersService::StripePayment).to have_received(:new).with(items: permitted_items, email: nil)
+        expect(OrdersService::StripePayment.new(items: permitted_items, email: nil)).to have_received(:create_checkout_session)
       end
 
       it 'creates an order with the correct parameters' do
