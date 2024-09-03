@@ -2,8 +2,9 @@
 
 module OrdersService
   class StripePayment
-    def initialize(items:)
+    def initialize(items:, email:)
       @items = items
+      @email = email
       Stripe.api_key = ENV['STRIPE_API_KEY']
     end
 
@@ -31,6 +32,7 @@ module OrdersService
         payment_method_types: ['card'],
         line_items:,
         mode: 'payment',
+        customer_email: @email,
         success_url: "#{root_url}/orders/success?session_id={CHECKOUT_SESSION_ID}",
         cancel_url: "#{root_url}/orders/cancel",
         billing_address_collection: 'required',

@@ -9,7 +9,8 @@ RSpec.describe OrdersService::StripePayment do
       { 'id' => 2, 'quantity' => 1 }
     ]
   end
-  let(:service) { described_class.new(items:) }
+  let(:email) { 'exampl@email.com' }
+  let(:service) { described_class.new(items:, email:) }
 
   before do
     checkout_session_double = double('Stripe::Checkout::Session', id: 'cs_1GqIC8XnYozEGLjpCz7iRjz8') # rubocop:disable RSpec/VerifiedDoubles
@@ -48,6 +49,7 @@ RSpec.describe OrdersService::StripePayment do
             }
           ],
           mode: 'payment',
+          customer_email: email,
           success_url: 'http://localhost:3000/orders/success?session_id={CHECKOUT_SESSION_ID}',
           cancel_url: 'http://localhost:3000/orders/cancel',
           billing_address_collection: 'required',
