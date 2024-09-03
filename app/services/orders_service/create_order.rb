@@ -10,7 +10,8 @@ module OrdersService
         OrderItem.create!(
           order:,
           product:,
-          quantity: item['quantity']
+          quantity: item['quantity'],
+          size: item['size']
         )
       end
 

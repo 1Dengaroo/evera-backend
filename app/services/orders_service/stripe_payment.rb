@@ -13,11 +13,13 @@ module OrdersService
         product = Product.find_by(id: item['id'], active: true)
         raise StripeError, 'Product not found' if product.nil?
 
+        product_name = item['size'].present? ? "#{product.name} (#{item['size']})" : product.name
+
         {
           price_data: {
             currency: 'usd',
             product_data: {
-              name: product.name
+              name: product_name
             },
             unit_amount: (product.price * 100).to_i
           },

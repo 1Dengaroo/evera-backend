@@ -5,7 +5,7 @@ class OrdersController < ApplicationController
   before_action :authenticate_admin!, only: %i[admin_index update]
 
   def create
-    permitted_items = params.require(:items).map { |item| item.permit(:id, :quantity).to_h }
+    permitted_items = params.require(:items).map { |item| item.permit(:id, :quantity, :size).to_h }
     amount_in_cents = (ProductsService::CalculateCartTotal.call(permitted_items) * 100).to_i
 
     begin
@@ -77,7 +77,7 @@ class OrdersController < ApplicationController
       only: %i[id email paid price created_at updated_at],
       include: {
         order_items: {
-          only: %i[product_id quantity],
+          only: %i[product_id quantity size],
           include: {
             product: {
               only: %i[name price]

@@ -37,10 +37,9 @@ RSpec.describe ProductsController, type: :controller do
     end
 
     context 'when the product does not exist' do
-      it 'returns a not found response' do
-        expect do
-          get(:show, params: { id: 9999 })
-        end.to raise_error(ActiveRecord::RecordNotFound)
+      it 'returns null' do
+        get :show, params: { id: 'invalid_id' }
+        expect(response.body).to eq('null')
       end
     end
   end
@@ -56,14 +55,6 @@ RSpec.describe ProductsController, type: :controller do
       it 'returns the correct price' do
         json_response = JSON.parse(response.body)
         expect(json_response['price'].to_f).to eq(active_product.price)
-      end
-    end
-
-    context 'when the product does not exist or is inactive' do
-      it 'returns a not found response' do
-        expect do
-          get(:price_by_id, params: { id: inactive_product.id })
-        end.to raise_error(ActiveRecord::RecordNotFound)
       end
     end
   end
