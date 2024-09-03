@@ -13,22 +13,19 @@ class Product < ApplicationRecord
   validate :sub_images_urls_format
   validate :valid_sizes
 
-  # Ensure `sub_images` are valid URLs
   def sub_images_urls_format
     sub_images.each do |url|
       errors.add(:sub_images, 'must contain valid URLs') unless url&.match?(URI::DEFAULT_PARSER.make_regexp(%w[http https]))
     end
   end
 
-  # Ensure sizes are valid
   def valid_sizes
-    allowed_sizes = %w[XS S M L XL XXL]
+    allowed_sizes = %w[XXS XS S M L XL XXL XXXL]
     sizes.each do |size|
       errors.add(:sizes, "#{size} is not a valid size") unless allowed_sizes.include?(size)
     end
   end
 
-  # Ensure sub_images is present only when there are images
   def images?
     sub_images.present?
   end
