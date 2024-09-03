@@ -13,6 +13,16 @@ RSpec.describe OrderItem, type: :model do
     expect(order_item).not_to be_valid
   end
 
+  it 'is valid without a size' do
+    order_item = build(:order_item, size: nil)
+    expect(order_item).to be_valid
+  end
+
+  it 'is valid with a size' do
+    order_item = build(:order_item, size: 'M')
+    expect(order_item).to be_valid
+  end
+
   it 'is not valid without a product' do
     order_item = build(:order_item, product: nil)
     expect(order_item).not_to be_valid

@@ -5,7 +5,7 @@ require 'rails_helper'
 RSpec.describe OrdersService::StripePayment do
   let(:items) do
     [
-      { 'id' => 1, 'quantity' => 2 },
+      { 'id' => 1, 'quantity' => 2, 'size' => 'M' },
       { 'id' => 2, 'quantity' => 1 }
     ]
   end
@@ -33,7 +33,7 @@ RSpec.describe OrdersService::StripePayment do
             {
               price_data: {
                 currency: 'usd',
-                product_data: { name: 'Product 1' },
+                product_data: { name: 'Product 1 (M)' },
                 unit_amount: 1000
               },
               quantity: 2

@@ -24,34 +24,26 @@ class ProductsController < ApplicationController
 
   def cart_total
     items = params.require(:items).map { |item| item.permit(:id, :quantity).to_h }
-    @total = ProductsService::CalculateCartTotal.call(items)
+    @total = CartsService::CalculateCartTotal.call(items)
     render json: { total: @total }
   end
 
   def validate_cart
     items = params.require(:items).map { |item| item.permit(:id, :quantity).to_h }
-    items.each do |item|
-      product = Product.find_by(id: item[:id])
-      if product.nil? || product.quantity < item[:quantity] || !product.active
-        render json: { valid: false }, status: :not_found
-        break
-      end
+    result = CartsService::ValidateCart.call(items)
+
+    if result[:valid]
+      render json: { valid: true }
+    else
+      render json: { valid: false, message: result[:message] }, status: result[:status]
     end
-    render json: { valid: true }
   end
 
   def validate_product
     @item = params.require(:item).permit(:id, :quantity).to_h
-    @product = Product.find_by(id: @item[:id])
-    if @product.nil?
-      render json: { valid: false, message: 'Product not found' }, status: :not_found
-    elsif @product.quantity < @item[:quantity]
-      render json: { valid: false, message: 'Product is out of stock' }, status: :unprocessable_entity
-    elsif !@product.active
-      render json: { valid: false, message: 'Product is no longer active' }, status: :unprocessable_entity
-    else
-      render json: { valid: true, message: 'Product is valid' }
-    end
+    result = CartsService::ValidateProduct.call(@item)
+
+    render json: { valid: result[:valid], message: result[:message] }, status: result[:status]
   end
 
   def front_page_products
@@ -61,7 +53,6 @@ class ProductsController < ApplicationController
 
   def create
     @product = Product.new(product_params)
-    @product.quantity = 9_999_999
     if @product.save
       render json: @product, status: :created
     else
@@ -84,29 +75,7 @@ class ProductsController < ApplicationController
   end
 
   def admin_index
-    @products = Product.all
-    @products = @products.where(active: params[:active]) if params[:active].present?
-    @products = @products.where('name ILIKE ?', "%#{params[:name]}%") if params[:name].present?
-
-    if params[:created_at].present?
-      start_date = begin
-        Date.parse(params[:created_at][:start_date])
-      rescue StandardError
-        nil
-      end
-      end_date = begin
-        Date.parse(params[:created_at][:end_date])
-      rescue StandardError
-        nil
-      end
-      @products = @products.where(created_at: start_date..end_date) if start_date && end_date
-    end
-
-    if params[:sort_by_date].present?
-      direction = params[:sort_by_date] == 'desc' ? :desc : :asc
-      @products = @products.order(created_at: direction)
-    end
-
+    @products = ProductsService::FilterProducts.call(params)
     render json: @products
   end
 

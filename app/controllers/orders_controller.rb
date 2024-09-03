@@ -6,7 +6,7 @@ class OrdersController < ApplicationController
 
   def create
     permitted_items = params.require(:items).map { |item| item.permit(:id, :quantity, :size).to_h }
-    amount_in_cents = (ProductsService::CalculateCartTotal.call(permitted_items) * 100).to_i
+    amount_in_cents = (CartsService::CalculateCartTotal.call(permitted_items) * 100).to_i
 
     begin
       session = OrdersService::StripePayment.new(items: permitted_items).create_checkout_session
@@ -39,26 +39,15 @@ class OrdersController < ApplicationController
   end
 
   def admin_index
-    @orders = Order.where(paid: true).order(created_at: :desc)
-
-    @orders = @orders.joins(:user).where(users: { email: params[:email] }) if params[:email].present?
-    @orders = @orders.joins(:delivery).where(deliveries: { status: params[:status] }) if params[:status].present?
-    @orders = @orders.where(id: params[:id]) if params[:id].present?
-
+    @orders = OrdersService::FilterOrders.call(params)
     render json: @orders.as_json(orders_json_options)
   end
 
   def update
-    @order = Order.find_by(id: params[:id])
-    delivery_params = order_update_params[:delivery_attributes]
-
-    delivery_params = @order.delivery.attributes.symbolize_keys.merge(delivery_params)
-
-    if @order.update(order_update_params.merge(delivery_attributes: delivery_params))
-      render json: @order.as_json(orders_json_options)
-    else
-      render json: { error: @order.errors.full_messages.to_sentence }, status: :unprocessable_entity
-    end
+    @order = OrdersService::UpdateOrder.call(order_id: params[:id], order_params: order_update_params)
+    render json: @order.as_json(orders_json_options)
+  rescue ActiveRecord::RecordInvalid => e
+    render json: { error: e.record.errors.full_messages.to_sentence }, status: :unprocessable_entity
   end
 
   def success
