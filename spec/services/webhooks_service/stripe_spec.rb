@@ -53,7 +53,7 @@ RSpec.describe WebhooksService::Stripe, type: :service do
         address:,
         session_id: session['id']
       )
-      allow(SendOrderConfirmationJob).to receive(:perform_later).with(order.id)
+      allow(SendOrderConfirmationJob).to receive(:perform_later).with(session['customer_details']['email'], order.id)
     end
 
     context 'when order is found' do
@@ -89,9 +89,9 @@ RSpec.describe WebhooksService::Stripe, type: :service do
         )
       end
 
-      it 'enqueues the SendOrderConfirmationJob' do
+      it 'sends the order confirmation email' do
         described_class.cs_completed(event)
-        expect(SendOrderConfirmationJob).to have_received(:perform_later).with(order.id)
+        expect(SendOrderConfirmationJob).to have_received(:perform_later).with(session['customer_details']['email'], order.id)
       end
     end
 
@@ -120,7 +120,7 @@ RSpec.describe WebhooksService::Stripe, type: :service do
         expect(order).not_to have_received(:create_delivery!)
       end
 
-      it 'does not enqueue the SendOrderConfirmationJob' do
+      it 'does not send the order confirmation email' do
         described_class.cs_completed(event)
         expect(SendOrderConfirmationJob).not_to have_received(:perform_later)
       end

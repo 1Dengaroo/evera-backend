@@ -6,9 +6,17 @@ module OrdersService
       order = Order.find_by(id: order_id)
       return nil unless order
 
-      delivery_params = order.delivery.attributes.symbolize_keys.merge(order_params[:delivery_attributes] || {})
+      old_status = order.delivery.status
 
-      raise ActiveRecord::RecordInvalid, order unless order.update!(order_params.merge(delivery_attributes: delivery_params))
+      delivery_params = order.delivery.attributes.symbolize_keys.merge(order_params[:delivery_attributes] || {})
+      merged_params = order_params.merge(delivery_attributes: delivery_params).to_h
+
+      new_status = merged_params.dig(:delivery_attributes, :status)
+
+      raise ActiveRecord::RecordInvalid, order unless order.update!(merged_params)
+
+      OrderShippedJob.perform_later(order.email, order.id) if new_status == 'shipped' && old_status == 'manufacturing'
+      OrderDeliveredJob.perform_later(order.email, order.id) if new_status == 'delivered' && old_status == 'shipped'
 
       order
     end
