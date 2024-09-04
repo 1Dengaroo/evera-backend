@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class Product < ApplicationRecord
+  before_create :generate_custom_id
+
   has_many :order_items
 
   validates :name, presence: true
@@ -28,5 +30,11 @@ class Product < ApplicationRecord
 
   def images?
     sub_images.present?
+  end
+
+  def generate_custom_id
+    date_component = Time.current.strftime('%y%m%d')
+    random_component = SecureRandom.random_number(10000).to_s.rjust(5, '0')
+    self.id = "#{date_component}#{random_component}"
   end
 end
