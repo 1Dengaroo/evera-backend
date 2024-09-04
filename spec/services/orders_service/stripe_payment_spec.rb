@@ -35,7 +35,7 @@ RSpec.describe OrdersService::StripePayment do
               price_data: {
                 currency: 'usd',
                 product_data: { name: 'Product 1 (M)' },
-                unit_amount: 1000
+                unit_amount: 10.00
               },
               quantity: 2
             },
@@ -43,7 +43,7 @@ RSpec.describe OrdersService::StripePayment do
               price_data: {
                 currency: 'usd',
                 product_data: { name: 'Product 2' },
-                unit_amount: 1550
+                unit_amount: 15.5
               },
               quantity: 1
             }

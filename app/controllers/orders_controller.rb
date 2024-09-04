@@ -6,13 +6,13 @@ class OrdersController < ApplicationController
 
   def create
     permitted_items = params.require(:items).map { |item| item.permit(:id, :quantity, :size).to_h }
-    amount_in_cents = (CartsService::CalculateCartTotal.call(permitted_items) * 100).to_i
+    total = CartsService::CalculateCartTotal.call(permitted_items)
 
     begin
       session = OrdersService::StripePayment.new(email: current_user&.email, items: permitted_items).create_checkout_session
       order = OrdersService::CreateOrder.call(
         checkout_session_id: session.id,
-        amount_in_cents:,
+        total: total,
         items: permitted_items
       )
 

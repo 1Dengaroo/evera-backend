@@ -4,7 +4,7 @@ class CreateProducts < ActiveRecord::Migration[7.2]
       t.string :id, primary_key: true
       t.string :name
       t.text :description
-      t.decimal :price
+      t.integer :price
       t.boolean :active
 
       t.timestamps
