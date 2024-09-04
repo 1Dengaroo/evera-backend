@@ -23,7 +23,7 @@ module NotificationsService
                     cover_image: order_item.product.cover_image,
                     quantity: order_item.quantity,
                     size: order_item.size,
-                    price: order_item.product.price
+                    price: (order_item.product.price / 100.0).round(2)
                   }
                 end,
                 total: (order.price / 100.0).round(2)

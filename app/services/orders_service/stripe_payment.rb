@@ -22,7 +22,7 @@ module OrdersService
             product_data: {
               name: product_name
             },
-            unit_amount: (product.price * 100).to_i
+            unit_amount: product.price
           },
           quantity: item['quantity']
         }

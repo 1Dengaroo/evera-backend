@@ -34,7 +34,7 @@ class Product < ApplicationRecord
 
   def generate_custom_id
     date_component = Time.current.strftime('%y%m%d')
-    random_component = SecureRandom.random_number(10000).to_s.rjust(5, '0')
+    random_component = SecureRandom.random_number(10_000).to_s.rjust(5, '0')
     self.id = "#{date_component}#{random_component}"
   end
 end
