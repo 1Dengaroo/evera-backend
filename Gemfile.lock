@@ -277,7 +277,10 @@ GEM
       rubocop (~> 1.61)
     ruby-progressbar (1.13.0)
     ruby2_keywords (0.0.5)
+    ruby_http_client (3.5.5)
     securerandom (0.3.1)
+    sendgrid-ruby (6.7.0)
+      ruby_http_client (~> 3.4)
     shoulda-matchers (5.3.0)
       activesupport (>= 5.2.0)
     sidekiq (7.3.1)
@@ -336,6 +339,7 @@ DEPENDENCIES
   rubocop
   rubocop-rails-omakase
   rubocop-rspec
+  sendgrid-ruby
   shoulda-matchers (~> 5.0)
   sidekiq
   sinatra

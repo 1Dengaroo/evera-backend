@@ -3,11 +3,10 @@
 class SendOrderConfirmationJob < ApplicationJob
   queue_as :default
 
-  def perform(order_id)
-    order = Order.find(order_id)
+  def perform(to, order_id)
+    order = Order.find_by(id: order_id)
+    return nil unless order
 
-    return unless order&.paid?
-
-    OrderMailer.confirmation_email(order).deliver_later
+    NotificationsService::Order::OrderConfirmation.send(to:, order:)
   end
 end
