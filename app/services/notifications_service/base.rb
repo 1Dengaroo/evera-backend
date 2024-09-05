@@ -7,6 +7,7 @@ module NotificationsService
   SEND_GRID_ERRORS_CODE = %w[400 401 406 429 500].freeze
   BASE_EMAIL = 'denga323@gmail.com'
   BASE_NAME = 'Evera'
+  ADMIN_EMAIL = ENV['ADMIN_EMAIL']
 
   class Base
     def self.raise_error_when_fails(response:)

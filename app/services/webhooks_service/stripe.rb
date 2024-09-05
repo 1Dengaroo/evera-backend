@@ -33,6 +33,7 @@ module WebhooksService
       )
 
       SendOrderConfirmationJob.perform_later(session['customer_details']['email'], order.id)
+      AdminOrderConfirmationJob.perform_later(order.id)
     end
   end
 end
