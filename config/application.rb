@@ -36,5 +36,15 @@ module PortalApi
 
     # Rack Attack
     config.middleware.use(Rack::Attack)
+
+    # CORS
+    config.middleware.insert_before 0, Rack::Cors do
+      allow do
+        origins 'https://everafashion.com'
+        resource '*',
+          headers: :any,
+          methods: [:get, :post, :put, :delete, :options]
+      end
+    end
   end
 end
