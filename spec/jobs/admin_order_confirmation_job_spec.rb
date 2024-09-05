@@ -3,7 +3,7 @@
 require 'rails_helper'
 
 RSpec.describe AdminOrderConfirmationJob, type: :job do
-  let(:order) { create(:order) }
+  let(:order) { create(:order, paid: true) }
 
   before do
     allow(NotificationsService::Order::AdminOrderConfirmation).to receive(:send)
