@@ -33,5 +33,8 @@ module PortalApi
 
     # Sidekiq
     config.active_job.queue_adapter = :sidekiq
+
+    # Rack Attack
+    config.middleware.use(Rack::Attack)
   end
 end
