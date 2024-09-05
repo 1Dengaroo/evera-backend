@@ -54,6 +54,7 @@ RSpec.describe WebhooksService::Stripe, type: :service do
         session_id: session['id']
       )
       allow(SendOrderConfirmationJob).to receive(:perform_later).with(session['customer_details']['email'], order.id)
+      allow(AdminOrderConfirmationJob).to receive(:perform_later).with(order.id)
     end
 
     context 'when order is found' do
@@ -93,6 +94,11 @@ RSpec.describe WebhooksService::Stripe, type: :service do
         described_class.cs_completed(event)
         expect(SendOrderConfirmationJob).to have_received(:perform_later).with(session['customer_details']['email'], order.id)
       end
+
+      it 'sends the admin order confirmation email' do
+        described_class.cs_completed(event)
+        expect(AdminOrderConfirmationJob).to have_received(:perform_later).with(order.id)
+      end
     end
 
     context 'when order is not found' do
@@ -123,6 +129,11 @@ RSpec.describe WebhooksService::Stripe, type: :service do
       it 'does not send the order confirmation email' do
         described_class.cs_completed(event)
         expect(SendOrderConfirmationJob).not_to have_received(:perform_later)
+      end
+
+      it 'does not send the admin order confirmation email' do
+        described_class.cs_completed(event)
+        expect(AdminOrderConfirmationJob).not_to have_received(:perform_later)
       end
     end
   end
