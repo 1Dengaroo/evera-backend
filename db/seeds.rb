@@ -4,7 +4,7 @@ products = [
   {
     name: 'New Venture Short-Sleeve Knit Polo Shirt',
     description: 'Effortlessly elevated. Made of soft, naturally thermoregulating merino wool, this knit polo delivers a polished look that is always on point.',
-    price: 11800,
+    price: 11_800,
     active: true,
     product_type: 'unisex',
     cover_image: 'https://images.lululemon.com/is/image/lululemon/LM3FCJS_032489_1?$product_tile$&wid=750&op_usm=0.8,1,10,0&fmt=webp&qlt=80,1&fit=constrain,0&op_sharpen=0&resMode=sharp2&iccEmbed=0&printRes=72',
@@ -49,7 +49,7 @@ products = [
   {
     name: 'New Venture Classic-Fit Long-Sleeve Shirt',
     description: 'This shirts destination? Wherever youre going. Stretchy, easy-care fabric on this commute-friendly button-up helps you arrive ready for anything.',
-    price: 11800,
+    price: 11_800,
     active: true,
     product_type: 'unisex',
     cover_image: 'https://images.lululemon.com/is/image/lululemon/LM3FCJS_032489_1?$product_tile$&wid=750&op_usm=0.8,1,10,0&fmt=webp&qlt=80,1&fit=constrain,0&op_sharpen=0&resMode=sharp2&iccEmbed=0&printRes=72',
@@ -64,7 +64,7 @@ products = [
   {
     name: 'Commission Long-Sleeve Shirt',
     description: 'Inspired by everyday adventure, this easy-care and classic-fit shirt is made for all-day comfort.',
-    price: 11800,
+    price: 11_800,
     active: true,
     product_type: 'unisex',
     cover_image: 'https://images.lululemon.com/is/image/lululemon/LM3FPCS_066848_1?wid=1600&op_usm=0.5,2,10,0&fmt=webp&qlt=80,1&fit=constrain,0&op_sharpen=0&resMode=sharp2&iccEmbed=0&printRes=72',

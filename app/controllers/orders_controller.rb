@@ -12,7 +12,7 @@ class OrdersController < ApplicationController
       session = OrdersService::StripePayment.new(email: current_user&.email, items: permitted_items).create_checkout_session
       order = OrdersService::CreateOrder.call(
         checkout_session_id: session.id,
-        total: total,
+        total:,
         items: permitted_items
       )
 
