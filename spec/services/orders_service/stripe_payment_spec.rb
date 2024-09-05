@@ -16,6 +16,9 @@ RSpec.describe OrdersService::StripePayment do
     checkout_session_double = double('Stripe::Checkout::Session', id: 'cs_1GqIC8XnYozEGLjpCz7iRjz8') # rubocop:disable RSpec/VerifiedDoubles
 
     allow(Stripe::Checkout::Session).to receive(:create).and_return(checkout_session_double)
+    allow(ENV).to receive(:[]).with('STRIPE_API_KEY').and_return('sk_test_4eC39HqLyjWDarjtT1zdp7dc')
+    allow(ENV).to receive(:[]).with('CLIENT_APP_PROTOCOL').and_return('http')
+    allow(ENV).to receive(:[]).with('CLIENT_APP_HOST').and_return('localhost:3000')
   end
 
   describe '#create_checkout_session' do
