@@ -5,7 +5,7 @@ module NotificationsService
 
   # https://docs.sendgrid.com/api-reference/how-to-use-the-sendgrid-v3-api/errors
   SEND_GRID_ERRORS_CODE = %w[400 401 406 429 500].freeze
-  BASE_EMAIL = 'denga323@gmail.com'
+  BASE_EMAIL = ENV['SENDGRID_SENDER_EMAIL']
   BASE_NAME = 'Evera'
   ADMIN_EMAIL = ENV['ADMIN_EMAIL']
 
