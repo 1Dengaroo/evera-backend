@@ -22,7 +22,7 @@ class Users::SessionsController < Devise::SessionsController
     return render json: { status: 401, message: 'Malformed token' }, status: :unauthorized unless token.present? && token.split('.').size == 3
 
     begin
-      jwt_payload = JWT.decode(token, Rails.application.credentials.devise_jwt_secret_key!, true, { algorithm: 'HS256' }).first
+      jwt_payload = JWT.decode(token, ENV['DEVISE_JWT_SECRET_KEY'], true, { algorithm: 'HS256' }).first
       current_user = User.find(jwt_payload['sub'])
     rescue JWT::DecodeError
       return render json: { status: 401, message: 'Invalid token' }, status: :unauthorized
