@@ -74,12 +74,14 @@ Rails.application.configure do
   config.action_mailer.default_url_options = { host: 'localhost', port: 3000 }
 
   config.action_mailer.smtp_settings = {
-    address: 'smtp.gmail.com',
+    address: 'smtp.sendgrid.net',
     port: 587,
-    domain: 'gmail.com',
-    user_name: ENV['GMAIL_USERNAME'],
-    password: ENV['GMAIL_PASSWORD'],
-    authentication: 'plain',
-    enable_starttls_auto: true
+    domain: 'everafashion.com',
+    user_name: 'apikey',
+    password: ENV['SENDGRID_API_KEY'],
+    authentication: :plain,
+    enable_starttls_auto: true,
+    return_response: true,
+    sendmail_settings: { enable_sandbox_mode: true }
   }
 end
