@@ -8,8 +8,9 @@ module CartsService
       return { valid: false, status: :unprocessable_entity, message: 'Product is out of stock' } if product.quantity < item[:quantity].to_i
       return { valid: false, status: :unprocessable_entity, message: 'Quantity must be greater than 0' } if item[:quantity].to_i <= 0
       return { valid: false, status: :unprocessable_entity, message: 'Quantity must be less than 10' } if item[:quantity].to_i >= 10
-      return { valid: false, status: :unprocessable_entity, message: 'Product is no longer active' } if !product.active
-      return { valid: true, message: 'Product is valid' }
+      return { valid: false, status: :unprocessable_entity, message: 'Product is no longer active' } unless product.active
+
+      { valid: true, message: 'Product is valid' }
     end
   end
 end

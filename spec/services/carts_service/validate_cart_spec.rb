@@ -56,7 +56,7 @@ RSpec.describe CartsService::ValidateCart, type: :service do
     end
 
     context 'when a product quantity is invalid' do
-      it 'returns unprocessable entity status' do
+      it 'returns unprocessable entity status when quantity is less than 1' do
         items = [
           { id: product_one.id, quantity: 0 }
         ]
@@ -65,7 +65,7 @@ RSpec.describe CartsService::ValidateCart, type: :service do
         expect(result).to eq({ valid: false, status: :unprocessable_entity, message: 'Quantity must be greater than 0' })
       end
 
-      it 'returns unprocessable entity status' do
+      it 'returns unprocessable entity status when quantity is greater than 10' do
         items = [
           { id: product_one.id, quantity: 10 }
         ]
