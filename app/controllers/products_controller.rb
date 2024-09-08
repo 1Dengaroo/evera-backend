@@ -24,6 +24,11 @@ class ProductsController < ApplicationController
 
   def cart_total
     items = params.require(:items).map { |item| item.permit(:id, :quantity).to_h }
+    unless CartsService::ValidateCart.call(items)
+      render json: { error: 'Invalid cart' }, status: :bad_request
+      return
+    end
+
     @total = CartsService::CalculateCartTotal.call(items)
     render json: { total: @total }
   end

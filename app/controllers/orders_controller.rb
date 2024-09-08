@@ -6,6 +6,12 @@ class OrdersController < ApplicationController
 
   def create
     permitted_items = params.require(:items).map { |item| item.permit(:id, :quantity, :size).to_h }
+
+    unless CartsService::ValidateCart.call(permitted_items)
+      render json: { error: 'Invalid cart' }, status: :bad_request
+      return
+    end
+
     total = CartsService::CalculateCartTotal.call(permitted_items)
 
     begin

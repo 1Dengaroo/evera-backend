@@ -4,15 +4,12 @@ module CartsService
   class ValidateProduct
     def self.call(item)
       product = Product.find_by(id: item[:id])
-      if product.nil?
-        { valid: false, status: :not_found, message: 'Product not found' }
-      elsif product.quantity < item[:quantity]
-        { valid: false, status: :unprocessable_entity, message: 'Product is out of stock' }
-      elsif !product.active
-        { valid: false, status: :unprocessable_entity, message: 'Product is no longer active' }
-      else
-        { valid: true, message: 'Product is valid' }
-      end
+      return { valid: false, status: :not_found, message: 'Product not found' } if product.nil?
+      return { valid: false, status: :unprocessable_entity, message: 'Product is out of stock' } if product.quantity < item[:quantity].to_i
+      return { valid: false, status: :unprocessable_entity, message: 'Quantity must be greater than 0' } if item[:quantity].to_i <= 0
+      return { valid: false, status: :unprocessable_entity, message: 'Quantity must be less than 10' } if item[:quantity].to_i >= 10
+      return { valid: false, status: :unprocessable_entity, message: 'Product is no longer active' } if !product.active
+      return { valid: true, message: 'Product is valid' }
     end
   end
 end
