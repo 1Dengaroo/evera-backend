@@ -27,7 +27,7 @@ RSpec.describe CartsService::ValidateCart, type: :service do
         ]
 
         result = described_class.call(items)
-        expect(result).to eq({ valid: false, status: :not_found })
+        expect(result).to eq({ valid: false, status: :not_found, message: 'Product not found' })
       end
     end
 
@@ -52,6 +52,26 @@ RSpec.describe CartsService::ValidateCart, type: :service do
 
         result = described_class.call(items)
         expect(result).to eq({ valid: false, status: :unprocessable_entity, message: 'Product is no longer active' })
+      end
+    end
+
+    context 'when a product quantity is invalid' do
+      it 'returns unprocessable entity status' do
+        items = [
+          { id: product_one.id, quantity: 0 }
+        ]
+
+        result = described_class.call(items)
+        expect(result).to eq({ valid: false, status: :unprocessable_entity, message: 'Quantity must be greater than 0' })
+      end
+
+      it 'returns unprocessable entity status' do
+        items = [
+          { id: product_one.id, quantity: 10 }
+        ]
+
+        result = described_class.call(items)
+        expect(result).to eq({ valid: false, status: :unprocessable_entity, message: 'Quantity must be less than 10' })
       end
     end
   end

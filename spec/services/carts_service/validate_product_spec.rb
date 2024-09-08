@@ -34,5 +34,19 @@ RSpec.describe CartsService::ValidateProduct, type: :service do
         expect(result).to eq({ valid: true, message: 'Product is valid' })
       end
     end
+
+    context 'when the product quantity is less than or equal to 0' do
+      it 'returns unprocessable entity status' do
+        result = described_class.call({ id: product.id, quantity: 0 })
+        expect(result).to eq({ valid: false, status: :unprocessable_entity, message: 'Quantity must be greater than 0' })
+      end
+    end
+
+    context 'when the product quantity is greater than or equal to 10' do
+      it 'returns unprocessable entity status' do
+        result = described_class.call({ id: product.id, quantity: 10 })
+        expect(result).to eq({ valid: false, status: :unprocessable_entity, message: 'Quantity must be less than 10' })
+      end
+    end
   end
 end
