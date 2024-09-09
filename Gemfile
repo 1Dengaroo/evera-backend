@@ -6,7 +6,7 @@ gem 'bootsnap', require: false
 gem 'devise'
 gem 'devise-jwt'
 gem 'jsonapi-serializer'
-gem 'pg', '~> 1.1'
+gem 'pg', '~> 1.5'
 gem 'puma', '>= 5.0'
 gem 'rack-attack', '~> 6.6', '>= 6.6.1'
 gem 'rack-cors'
