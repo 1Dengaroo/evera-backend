@@ -73,7 +73,7 @@ class OrdersController < ApplicationController
           only: %i[product_id quantity size],
           include: {
             product: {
-              only: %i[name price]
+              only: %i[name price cover_image]
             }
           }
         },

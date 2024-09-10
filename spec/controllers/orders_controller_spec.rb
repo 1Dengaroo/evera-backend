@@ -210,7 +210,6 @@ RSpec.describe OrdersController, type: :controller do
       end
 
       it 'updates the order delivery information' do
-        # Stub the service call
         updated_order = order
         updated_order.delivery.update(status: 'delivered', tracking_information: '1234567890')
         allow(OrdersService::UpdateOrder).to receive(:call).and_return(updated_order)
@@ -239,7 +238,6 @@ RSpec.describe OrdersController, type: :controller do
       end
 
       it 'returns an error if the update fails' do
-        # Stub the service call to raise an exception
         allow(OrdersService::UpdateOrder).to receive(:call).and_raise(ActiveRecord::RecordInvalid.new(order))
 
         put :update, params: {
