@@ -4,16 +4,18 @@ module WebhooksService
   class Stripe
     def self.cs_completed(event)
       session = event['data']['object']
-
       order = Order.find_by(checkout_session_id: session['id'])
       return unless order
 
-      order.update(paid: true, email: session['customer_details']['email'])
+      order.update!(paid: true, email: session['customer_details']['email'])
 
       order.order_items.each do |item|
         product = item.product
-        product.update(quantity: product.quantity - item.quantity)
+        product.update!(quantity: product.quantity - item.quantity)
       end
+
+      order.update!(amount_shipping: session['total_details']['amount_shipping'], amount_tax: session['total_details']['amount_tax'],
+                    shipping_code: session['shipping_cost']['shipping_rate'])
 
       shipping_details = session['shipping_details']
       address = Address.create!(
@@ -34,6 +36,8 @@ module WebhooksService
 
       SendOrderConfirmationJob.perform_later(session['customer_details']['email'], order.id)
       AdminOrderConfirmationJob.perform_later(order.id)
+    rescue StandardError => e
+      Rails.logger.debug(e.message)
     end
   end
 end

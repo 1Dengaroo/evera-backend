@@ -10,7 +10,7 @@ RSpec.describe NotificationsService::Order::OrderShipped, type: :service do
     double( # rubocop:disable RSpec/VerifiedDoubles
       'Order',
       id: '12345',
-      price: 2999,
+      subtotal: 2999,
       created_at: Time.current,
       delivery: double('Delivery', # rubocop:disable RSpec/VerifiedDoubles
                        address: double('Address', name: 'Andy Deng', line1: '123 Main St', line2: '', city: 'Boston', state: 'MA', postal_code: '02118'), # rubocop:disable RSpec/VerifiedDoubles

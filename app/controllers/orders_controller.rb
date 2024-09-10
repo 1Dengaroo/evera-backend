@@ -12,13 +12,11 @@ class OrdersController < ApplicationController
       return
     end
 
-    total = CartsService::CalculateCartTotal.call(permitted_items)
-
     begin
       session = OrdersService::StripePayment.new(email: current_user&.email, items: permitted_items).create_checkout_session
       order = OrdersService::CreateOrder.call(
         checkout_session_id: session.id,
-        total:,
+        subtotal: CartsService::CalculateCartTotal.call(permitted_items),
         items: permitted_items
       )
 
@@ -69,7 +67,7 @@ class OrdersController < ApplicationController
 
   def orders_json_options
     {
-      only: %i[id email paid price created_at updated_at],
+      only: %i[id email paid subtotal amount_shipping amount_tax created_at updated_at],
       include: {
         order_items: {
           only: %i[product_id quantity size],

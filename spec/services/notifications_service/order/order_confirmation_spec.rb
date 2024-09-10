@@ -10,7 +10,10 @@ RSpec.describe NotificationsService::Order::OrderConfirmation, type: :service do
     double( # rubocop:disable RSpec/VerifiedDoubles
       'Order',
       id: '12345',
-      price: 2999,
+      subtotal: 2999,
+      amount_shipping: 500,
+      amount_tax: 250,
+      amount_total: 3749,
       created_at: Time.current,
       delivery: double('Delivery', address: double('Address', line1: '123 Main St', line2: '', city: 'Boston', state: 'MA', postal_code: '02118')), # rubocop:disable RSpec/VerifiedDoubles
       order_items: [
@@ -37,7 +40,10 @@ RSpec.describe NotificationsService::Order::OrderConfirmation, type: :service do
               { name: 'T-shirt', cover_image: 'https://example.com/tshirt.png', quantity: 1, size: 'M', price: 19.99 },
               { name: 'Hoodie', cover_image: 'https://example.com/hoodie.png', quantity: 2, size: 'L', price: 49.99 }
             ],
-            total: 29.99
+            subtotal: (order.subtotal / 100.0).round(2),
+            amount_shipping: (order.amount_shipping / 100.0).round(2),
+            amount_tax: (order.amount_tax / 100.0).round(2),
+            total: (order.amount_total / 100.0).round(2)
           }
         }
       ],

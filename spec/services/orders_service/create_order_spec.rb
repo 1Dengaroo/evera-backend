@@ -4,7 +4,7 @@ require 'rails_helper'
 
 RSpec.describe OrdersService::CreateOrder, type: :service do
   let(:checkout_session_id) { 'cs_123' }
-  let(:total) { 3000 }
+  let(:subtotal) { 3000 }
   let(:product_one) { create(:product, price: 1000) }
   let(:product_two) { create(:product, price: 2000) }
   let(:items) do
@@ -19,7 +19,7 @@ RSpec.describe OrdersService::CreateOrder, type: :service do
       expect do
         described_class.call(
           checkout_session_id:,
-          total:,
+          subtotal:,
           items:
         )
       end.to change(Order, :count).by(1)
@@ -28,7 +28,7 @@ RSpec.describe OrdersService::CreateOrder, type: :service do
       order = Order.last
       expect(order.email).to be_nil
       expect(order.checkout_session_id).to eq(checkout_session_id)
-      expect(order.price).to eq(total)
+      expect(order.subtotal).to eq(subtotal)
       expect(order.paid).to be_falsey
 
       order_item1 = order.order_items.find_by(product: product_one)
@@ -49,7 +49,7 @@ RSpec.describe OrdersService::CreateOrder, type: :service do
       expect do
         described_class.call(
           checkout_session_id:,
-          total:,
+          subtotal:,
           items: invalid_items
         )
       end.to raise_error(ActiveRecord::RecordNotFound)

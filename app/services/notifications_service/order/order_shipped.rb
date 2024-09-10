@@ -26,7 +26,7 @@ module NotificationsService
                     price: (order_item.product.price / 100.0).round(2)
                   }
                 end,
-                total: (order.price / 100.0).round(2),
+                total: (order.subtotal / 100.0).round(2),
                 tracking_information: order.delivery.tracking_information,
                 name: order.delivery.address.name,
                 date: Time.current.strftime('%B %d, %Y')

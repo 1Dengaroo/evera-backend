@@ -2,8 +2,8 @@
 
 module OrdersService
   class CreateOrder
-    def self.call(checkout_session_id:, total:, items:)
-      order = Order.create!(checkout_session_id:, paid: false, price: total)
+    def self.call(checkout_session_id:, subtotal:, items:)
+      order = Order.create!(checkout_session_id:, paid: false, subtotal:)
 
       items.each do |item|
         product = Product.find(item['id'])

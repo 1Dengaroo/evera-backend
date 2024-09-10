@@ -22,7 +22,7 @@ RSpec.describe OrdersController, type: :controller do
     let(:permitted_items) do
       items.map(&:with_indifferent_access)
     end
-    let(:total) { 2000 }
+    let(:subtotal) { 2000 }
     let(:checkout_session_id) { 'cs_1GqIC8XnYozEGLjpCz7iRjz8' }
     let(:checkout_session) { double('Stripe::Checkout::Session', id: checkout_session_id) } # rubocop:disable RSpec/VerifiedDoubles
     let(:order) { instance_double(Order, id: 123, update!: true) }
@@ -31,7 +31,7 @@ RSpec.describe OrdersController, type: :controller do
     context 'when the request is successful and the user is logged in' do
       before do
         sign_in user
-        allow(CartsService::CalculateCartTotal).to receive(:call).with(permitted_items).and_return(total)
+        allow(CartsService::CalculateCartTotal).to receive(:call).with(permitted_items).and_return(subtotal)
 
         stripe_payment_instance = instance_double(OrdersService::StripePayment)
         allow(OrdersService::StripePayment).to receive(:new).with(items: permitted_items, email: user.email).and_return(stripe_payment_instance)
@@ -40,7 +40,7 @@ RSpec.describe OrdersController, type: :controller do
         allow(OrdersService::CreateOrder).to receive(:call).and_return(order)
       end
 
-      it 'calculates the total amount in cents' do
+      it 'calculates the subtotal amount in cents' do
         post :create, params: { items: }
 
         expect(CartsService::CalculateCartTotal).to have_received(:call).with(permitted_items)
@@ -58,7 +58,7 @@ RSpec.describe OrdersController, type: :controller do
 
         expect(OrdersService::CreateOrder).to have_received(:call).with(
           checkout_session_id:,
-          total:,
+          subtotal:,
           items: permitted_items
         )
       end
@@ -74,14 +74,14 @@ RSpec.describe OrdersController, type: :controller do
     context 'when the request is successful and the user is not logged in' do
       before do
         sign_out user
-        allow(CartsService::CalculateCartTotal).to receive(:call).with(permitted_items).and_return(total)
+        allow(CartsService::CalculateCartTotal).to receive(:call).with(permitted_items).and_return(subtotal)
         stripe_payment_instance = instance_double(OrdersService::StripePayment)
         allow(OrdersService::StripePayment).to receive(:new).with(items: permitted_items, email: nil).and_return(stripe_payment_instance)
         allow(stripe_payment_instance).to receive(:create_checkout_session).and_return(checkout_session)
         allow(OrdersService::CreateOrder).to receive(:call).and_return(order)
       end
 
-      it 'calculates the total amount in cents' do
+      it 'calculates the subtotal amount in cents' do
         post :create, params: { items: }
 
         expect(CartsService::CalculateCartTotal).to have_received(:call).with(permitted_items)
@@ -99,7 +99,7 @@ RSpec.describe OrdersController, type: :controller do
 
         expect(OrdersService::CreateOrder).to have_received(:call).with(
           checkout_session_id:,
-          total:,
+          subtotal:,
           items: permitted_items
         )
       end
@@ -189,7 +189,6 @@ RSpec.describe OrdersController, type: :controller do
     end
 
     it 'filters orders by status if provided' do
-      # Stub the service call
       order_with_shipped_status = create(:order, paid: true, delivery: create(:delivery, status: 'shipped'))
       allow(OrdersService::FilterOrders).to receive(:call).and_return([order_with_shipped_status])
 

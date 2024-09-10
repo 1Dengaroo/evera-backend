@@ -42,4 +42,9 @@ RSpec.describe Order, type: :model do
 
     expect { order.destroy }.to change(Delivery, :count).by(-1)
   end
+
+  it 'amount_total returns the sum of subtotal, amount_shipping, and amount_tax' do
+    order = create(:order, subtotal: 1000, amount_shipping: 200, amount_tax: 50)
+    expect(order.amount_total).to eq(1250)
+  end
 end

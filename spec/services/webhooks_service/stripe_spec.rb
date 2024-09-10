@@ -22,6 +22,13 @@ RSpec.describe WebhooksService::Stripe, type: :service do
                 'state' => 'NY'
               },
               'name' => 'John Doe'
+            },
+            'total_details' => {
+              'amount_shipping' => 500,
+              'amount_tax' => 100
+            },
+            'shipping_cost' => {
+              'shipping_rate' => 'shr_123'
             }
           }
         }
@@ -37,8 +44,11 @@ RSpec.describe WebhooksService::Stripe, type: :service do
 
     before do
       allow(Order).to receive(:find_by).with(checkout_session_id: session['id']).and_return(order)
-      allow(order).to receive(:update).with(paid: true, email: session['customer_details']['email'])
-      allow(product).to receive(:update).with(quantity: product.quantity - order_item.quantity)
+      allow(order).to receive(:update!).with(paid: true, email: session['customer_details']['email'])
+      allow(product).to receive(:update!).with(quantity: product.quantity - order_item.quantity)
+      allow(order).to receive(:update!).with(amount_shipping: session['total_details']['amount_shipping'],
+                                             amount_tax: session['total_details']['amount_tax'],
+                                             shipping_code: session['shipping_cost']['shipping_rate'])
       allow(Address).to receive(:create!).with(
         city: session['shipping_details']['address']['city'],
         country: session['shipping_details']['address']['country'],
@@ -60,12 +70,21 @@ RSpec.describe WebhooksService::Stripe, type: :service do
     context 'when order is found' do
       it 'updates the order as paid' do
         described_class.cs_completed(event)
-        expect(order).to have_received(:update).with(paid: true, email: session['customer_details']['email'])
+        expect(order).to have_received(:update!).with(paid: true, email: session['customer_details']['email'])
       end
 
       it 'updates the product quantity' do
         described_class.cs_completed(event)
-        expect(product).to have_received(:update).with(quantity: product.quantity - order_item.quantity)
+        expect(product).to have_received(:update!).with(quantity: product.quantity - order_item.quantity)
+      end
+
+      it 'updates the order with shipping and tax details' do
+        described_class.cs_completed(event)
+        expect(order).to have_received(:update!).with(
+          amount_shipping: session['total_details']['amount_shipping'],
+          amount_tax: session['total_details']['amount_tax'],
+          shipping_code: session['shipping_cost']['shipping_rate']
+        )
       end
 
       it 'creates the address' do
@@ -108,12 +127,12 @@ RSpec.describe WebhooksService::Stripe, type: :service do
 
       it 'does not update the order' do
         described_class.cs_completed(event)
-        expect(order).not_to have_received(:update)
+        expect(order).not_to have_received(:update!)
       end
 
       it 'does not update the product quantity' do
         described_class.cs_completed(event)
-        expect(product).not_to have_received(:update)
+        expect(product).not_to have_received(:update!)
       end
 
       it 'does not create the address' do

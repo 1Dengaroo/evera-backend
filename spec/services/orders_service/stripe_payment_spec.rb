@@ -9,16 +9,17 @@ RSpec.describe OrdersService::StripePayment do
       { 'id' => 2, 'quantity' => 1 }
     ]
   end
-  let(:email) { 'exampl@email.com' }
+  let(:email) { 'example@email.com' }
   let(:service) { described_class.new(items:, email:) }
+
+  ENV['STRIPE_API_KEY'] = 'sk_test_4eC39HqLyjWDarjtT1zdp7dc'
+  ENV['CLIENT_APP_PROTOCOL'] = 'http'
+  ENV['CLIENT_APP_HOST'] = 'localhost:3000'
 
   before do
     checkout_session_double = double('Stripe::Checkout::Session', id: 'cs_1GqIC8XnYozEGLjpCz7iRjz8') # rubocop:disable RSpec/VerifiedDoubles
 
     allow(Stripe::Checkout::Session).to receive(:create).and_return(checkout_session_double)
-    allow(ENV).to receive(:[]).with('STRIPE_API_KEY').and_return('sk_test_4eC39HqLyjWDarjtT1zdp7dc')
-    allow(ENV).to receive(:[]).with('CLIENT_APP_PROTOCOL').and_return('http')
-    allow(ENV).to receive(:[]).with('CLIENT_APP_HOST').and_return('localhost:3000')
   end
 
   describe '#create_checkout_session' do
@@ -53,12 +54,55 @@ RSpec.describe OrdersService::StripePayment do
           ],
           mode: 'payment',
           customer_email: email,
+          automatic_tax: { enabled: true },
           success_url: 'http://localhost:3000/orders/success?session_id={CHECKOUT_SESSION_ID}',
           cancel_url: 'http://localhost:3000/orders/cancel',
           billing_address_collection: 'required',
           shipping_address_collection: {
             allowed_countries: %w[US CA]
-          }
+          },
+          shipping_options: [
+            {
+              shipping_rate_data: {
+                type: 'fixed_amount',
+                fixed_amount: {
+                  amount: 0,
+                  currency: 'usd'
+                },
+                display_name: 'Free Shipping',
+                delivery_estimate: {
+                  minimum: {
+                    unit: 'business_day',
+                    value: 5
+                  },
+                  maximum: {
+                    unit: 'business_day',
+                    value: 10
+                  }
+                }
+              }
+            },
+            {
+              shipping_rate_data: {
+                type: 'fixed_amount',
+                fixed_amount: {
+                  amount: 1500,
+                  currency: 'usd'
+                },
+                display_name: 'Expedited Shipping',
+                delivery_estimate: {
+                  minimum: {
+                    unit: 'business_day',
+                    value: 2
+                  },
+                  maximum: {
+                    unit: 'business_day',
+                    value: 4
+                  }
+                }
+              }
+            }
+          ]
         )
         expect(checkout_session.id).to eq('cs_1GqIC8XnYozEGLjpCz7iRjz8')
       end

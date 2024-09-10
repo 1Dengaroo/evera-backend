@@ -26,7 +26,10 @@ module NotificationsService
                     price: (order_item.product.price / 100.0).round(2)
                   }
                 end,
-                total: (order.price / 100.0).round(2),
+                subtotal: (order.subtotal / 100.0).round(2),
+                amount_shipping: (order.amount_shipping / 100.0).round(2),
+                amount_tax: (order.amount_tax / 100.0).round(2),
+                total: (order.amount_total / 100.0).round(2),
                 email: order.delivery.email
               }
             }

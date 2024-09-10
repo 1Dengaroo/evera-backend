@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2024_09_03_171838) do
+ActiveRecord::Schema[7.2].define(version: 2024_09_10_164814) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -36,6 +36,9 @@ ActiveRecord::Schema[7.2].define(version: 2024_09_03_171838) do
     t.bigint "address_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "shipping_option", default: "Free Shipping", null: false
+    t.integer "shipping_price", default: 0, null: false
+    t.string "shipping_rate", default: "N/A", null: false
     t.index ["address_id"], name: "index_deliveries_on_address_id"
     t.index ["order_id"], name: "index_deliveries_on_order_id"
     t.index ["session_id"], name: "index_deliveries_on_session_id", unique: true
@@ -57,8 +60,11 @@ ActiveRecord::Schema[7.2].define(version: 2024_09_03_171838) do
     t.boolean "paid"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.integer "price"
+    t.integer "subtotal"
     t.bigint "user_id"
+    t.integer "amount_shipping"
+    t.integer "amount_tax"
+    t.string "shipping_code"
     t.index ["user_id"], name: "index_orders_on_user_id"
   end
 
