@@ -4,7 +4,7 @@ class ProductsController < ApplicationController
   before_action :authenticate_admin!, only: %i[create edit update admin_index]
 
   def index
-    @products = Product.where(active: true)
+    @products = ProductsService::UserFilterProducts.call(params)
     render json: @products
   end
 
@@ -80,7 +80,7 @@ class ProductsController < ApplicationController
   end
 
   def admin_index
-    @products = ProductsService::FilterProducts.call(params)
+    @products = ProductsService::AdminFilterProducts.call(params)
     render json: @products
   end
 

@@ -1,8 +1,7 @@
 # frozen_string_literal: true
 
-# app/services/products_service/filter_products.rb
 module ProductsService
-  class FilterProducts
+  class AdminFilterProducts
     def self.call(params)
       products = Product.all
 

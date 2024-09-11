@@ -7,7 +7,7 @@ RSpec.describe ProductsController, type: :controller do
 
   let!(:active_product) { FactoryBot.create(:product, active: true, price: 99.99) }
   let!(:inactive_product) { FactoryBot.create(:product, active: false) }
-  let!(:other_active_product) { FactoryBot.create(:product, active: true, price: 149.99) }
+  let!(:other_active_product) { FactoryBot.create(:product, name: 'Name', active: true, price: 149.99) }
 
   describe 'GET #index' do
     before { get :index }
@@ -20,6 +20,36 @@ RSpec.describe ProductsController, type: :controller do
       json_response = JSON.parse(response.body)
       expect(json_response.length).to eq(2)
       expect(json_response.map { |product| product['id'] }).to contain_exactly(active_product.id, other_active_product.id)
+    end
+
+    context 'when there are filters' do
+      before do
+        allow(ProductsService::UserFilterProducts).to receive(:call).and_return([active_product])
+        get :index, params: { name: 'Name' }
+      end
+
+      it 'calls the ProductsService::UserFilterProducts service' do
+        expect(ProductsService::UserFilterProducts).to have_received(:call).with(anything)
+      end
+
+      it 'returns the products filtered by the service' do
+        json_response = JSON.parse(response.body)
+        expect(json_response.length).to eq(1)
+        expect(json_response.map { |product| product['id'] }).to contain_exactly(active_product.id)
+      end
+
+      it 'returns a successful response' do
+        expect(response).to be_successful
+      end
+    end
+
+    context 'when the filters are invalid' do
+      it 'ignores the invalid filters' do
+        get :index, params: { invalid: 'Invalid Name' }
+        json_response = JSON.parse(response.body)
+        expect(json_response.length).to eq(2)
+        expect(json_response.map { |product| product['id'] }).to contain_exactly(active_product.id, other_active_product.id)
+      end
     end
   end
 
@@ -102,12 +132,12 @@ RSpec.describe ProductsController, type: :controller do
     context 'when the user is an admin' do
       before do
         sign_in admin
-        allow(ProductsService::FilterProducts).to receive(:call).and_return([active_product, other_active_product])
+        allow(ProductsService::AdminFilterProducts).to receive(:call).and_return([active_product, other_active_product])
         get :admin_index, params: { active: 'true' }
       end
 
       it 'calls the ProductsService::FilterProducts service' do
-        expect(ProductsService::FilterProducts).to have_received(:call).with(anything)
+        expect(ProductsService::AdminFilterProducts).to have_received(:call).with(anything)
       end
 
       it 'returns a successful response' do
@@ -124,7 +154,7 @@ RSpec.describe ProductsController, type: :controller do
     context 'when the user is not an admin' do
       before do
         sign_in user
-        allow(ProductsService::FilterProducts).to receive(:call)
+        allow(ProductsService::AdminFilterProducts).to receive(:call)
         get :admin_index
       end
 
@@ -133,7 +163,7 @@ RSpec.describe ProductsController, type: :controller do
       end
 
       it 'does not call the ProductsService::FilterProducts service' do
-        expect(ProductsService::FilterProducts).not_to have_received(:call)
+        expect(ProductsService::AdminFilterProducts).not_to have_received(:call)
       end
 
       it 'returns an unauthorized error message' do

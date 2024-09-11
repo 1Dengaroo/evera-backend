@@ -2,7 +2,7 @@
 
 require 'rails_helper'
 
-RSpec.describe ProductsService::FilterProducts, type: :service do
+RSpec.describe ProductsService::AdminFilterProducts, type: :service do
   let!(:product_one) { create(:product, name: 'Product A', active: true, created_at: 3.days.ago) }
   let!(:product_two) { create(:product, name: 'Product B', active: false, created_at: 2.days.ago) }
   let!(:product_three) { create(:product, name: 'Product C', active: true, created_at: 1.day.ago) }
