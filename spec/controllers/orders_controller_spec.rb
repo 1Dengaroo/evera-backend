@@ -32,12 +32,11 @@ RSpec.describe OrdersController, type: :controller do
       before do
         sign_in user
         allow(CartsService::CalculateCartTotal).to receive(:call).with(permitted_items).and_return(subtotal)
-
+        allow(CartsService::ValidateCart).to receive(:call).with(permitted_items).and_return({ valid: true })
+        allow(OrdersService::CreateOrder).to receive(:call).and_return(order)
         stripe_payment_instance = instance_double(OrdersService::StripePayment)
         allow(OrdersService::StripePayment).to receive(:new).with(items: permitted_items, email: user.email).and_return(stripe_payment_instance)
         allow(stripe_payment_instance).to receive(:create_checkout_session).and_return(checkout_session)
-
-        allow(OrdersService::CreateOrder).to receive(:call).and_return(order)
       end
 
       it 'calculates the subtotal amount in cents' do
@@ -75,6 +74,7 @@ RSpec.describe OrdersController, type: :controller do
       before do
         sign_out user
         allow(CartsService::CalculateCartTotal).to receive(:call).with(permitted_items).and_return(subtotal)
+        allow(CartsService::ValidateCart).to receive(:call).with(permitted_items).and_return({ valid: true })
         stripe_payment_instance = instance_double(OrdersService::StripePayment)
         allow(OrdersService::StripePayment).to receive(:new).with(items: permitted_items, email: nil).and_return(stripe_payment_instance)
         allow(stripe_payment_instance).to receive(:create_checkout_session).and_return(checkout_session)
@@ -109,6 +109,49 @@ RSpec.describe OrdersController, type: :controller do
 
         expect(response).to have_http_status(:ok)
         expect(JSON.parse(response.body)).to eq({ 'session_id' => checkout_session_id })
+      end
+    end
+
+    context 'when the cart is invalid' do
+      before do
+        allow(CartsService::ValidateCart).to receive(:call).with(permitted_items).and_return({ valid: false })
+        allow(CartsService::CalculateCartTotal).to receive(:call).with(permitted_items).and_return(subtotal)
+        stripe_payment_instance = instance_double(OrdersService::StripePayment)
+        allow(OrdersService::StripePayment).to receive(:new).with(items: permitted_items, email: nil).and_return(stripe_payment_instance)
+        allow(stripe_payment_instance).to receive(:create_checkout_session).and_return(checkout_session)
+        allow(OrdersService::CreateOrder).to receive(:call).and_return(order)
+      end
+
+      it 'returns a bad request status' do
+        post :create, params: { items: }
+
+        expect(response).to have_http_status(:bad_request)
+        expect(JSON.parse(response.body)).to eq({ 'error' => 'Invalid cart' })
+      end
+
+      it 'does not create an order' do
+        post :create, params: { items: }
+
+        expect(OrdersService::CreateOrder).not_to have_received(:call)
+      end
+
+      it 'does not create a Stripe checkout session' do
+        post :create, params: { items: }
+
+        expect(OrdersService::StripePayment).not_to have_received(:new)
+        expect(OrdersService::StripePayment.new(items: permitted_items, email: nil)).not_to have_received(:create_checkout_session)
+      end
+
+      it 'does not calculate the subtotal amount' do
+        post :create, params: { items: }
+
+        expect(CartsService::CalculateCartTotal).not_to have_received(:call)
+      end
+
+      it 'does not return a session ID in the response' do
+        post :create, params: { items: }
+
+        expect(JSON.parse(response.body)).not_to include('session_id')
       end
     end
   end

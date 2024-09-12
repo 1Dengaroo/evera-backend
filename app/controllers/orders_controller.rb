@@ -7,7 +7,7 @@ class OrdersController < ApplicationController
   def create
     permitted_items = params.require(:items).map { |item| item.permit(:id, :quantity, :size).to_h }
 
-    unless CartsService::ValidateCart.call(permitted_items)
+    unless CartsService::ValidateCart.call(permitted_items)[:valid]
       render json: { error: 'Invalid cart' }, status: :bad_request
       return
     end
