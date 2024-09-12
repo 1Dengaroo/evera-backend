@@ -11,6 +11,9 @@ Rails.application.routes.draw do
                        registrations: 'users/registrations',
                        passwords: 'users/passwords'
                      }
+  devise_scope :user do
+    get 'users/check_admin', to: 'users/sessions#check_admin'
+  end
 
   resources :products, only: %i[index show create edit update] do
     member do
