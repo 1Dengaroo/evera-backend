@@ -4,7 +4,7 @@ module ProductsService
   class SimilarProducts
     def self.call(product)
       active_products = Product.where(active: true).where.not(id: product.id)
-      
+
       lcs_scores = active_products.map do |other_product|
         {
           product: other_product,
@@ -24,11 +24,11 @@ module ProductsService
 
       (1..m).each do |i|
         (1..n).each do |j|
-          if str1[i - 1] == str2[j - 1]
-            dp[i][j] = dp[i - 1][j - 1] + 1
-          else
-            dp[i][j] = [dp[i - 1][j], dp[i][j - 1]].max
-          end
+          dp[i][j] = if str1[i - 1] == str2[j - 1]
+                       dp[i - 1][j - 1] + 1
+                     else
+                       [dp[i - 1][j], dp[i][j - 1]].max
+                     end
         end
       end
 
