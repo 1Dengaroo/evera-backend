@@ -56,6 +56,12 @@ class ProductsController < ApplicationController
     render json: @products
   end
 
+  def similar_products
+    @product = Product.find_by(id: params[:id])
+    @products = ProductsService::SimilarProducts.call(@product)
+    render json: @products
+  end
+
   def create
     @product = Product.new(product_params)
     if @product.save

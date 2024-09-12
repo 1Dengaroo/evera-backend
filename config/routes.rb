@@ -18,6 +18,7 @@ Rails.application.routes.draw do
   resources :products, only: %i[index show create edit update] do
     member do
       get 'price_by_id'
+      get 'similar_products'
     end
     collection do
       post 'cart_total'
