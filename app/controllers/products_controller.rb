@@ -34,7 +34,7 @@ class ProductsController < ApplicationController
   end
 
   def validate_cart
-    items = params.require(:items).map { |item| item.permit(:id, :quantity).to_h }
+    items = params.require(:items).map { |item| item.permit(:id, :quantity, :size).to_h }
     result = CartsService::ValidateCart.call(items)
 
     if result[:valid]
@@ -45,7 +45,7 @@ class ProductsController < ApplicationController
   end
 
   def validate_product
-    @item = params.require(:item).permit(:id, :quantity).to_h
+    @item = params.require(:item).permit(:id, :quantity, :size).to_h
     result = CartsService::ValidateProduct.call(@item)
 
     render json: { valid: result[:valid], message: result[:message] }, status: result[:status]
