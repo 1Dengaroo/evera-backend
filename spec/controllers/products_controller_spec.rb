@@ -178,6 +178,96 @@ RSpec.describe ProductsController, type: :controller do
     end
   end
 
+  describe 'POST #cart_item_details' do
+    let(:valid_items) do
+      [
+        { 'id' => '123', 'quantity' => 2, 'size' => 'M' },
+        { 'id' => '456', 'quantity' => 1, 'size' => 'L' }
+      ]
+    end
+
+    let(:invalid_items) do
+      [
+        { 'id' => '789', 'quantity' => 1, 'size' => 'S' }
+      ]
+    end
+
+    let(:valid_item_details) do
+      [
+        {
+          id: '123',
+          size: 'M',
+          price: 50.0,
+          isValid: true,
+          validationMessage: 'Valid product'
+        },
+        {
+          id: '456',
+          size: 'L',
+          price: 75.0,
+          isValid: true,
+          validationMessage: 'Valid product'
+        }
+      ]
+    end
+
+    let(:invalid_item_details) do
+      [
+        {
+          id: '789',
+          size: 'S',
+          price: 0,
+          isValid: false,
+          validationMessage: 'Product not found.'
+        }
+      ]
+    end
+
+    before do
+      allow(CartsService::CheckoutItemDetails).to receive(:call).and_return(valid_item_details + invalid_item_details)
+      allow(CartsService::CalculateCartTotal).to receive(:call).and_return(125.0)
+    end
+
+    context 'with valid items' do
+      it 'returns the correct item details, total, and cart validation status' do
+        post :cart_item_details, params: { items: valid_items + invalid_items }
+
+        expect(response).to have_http_status(:ok)
+        parsed_response = JSON.parse(response.body).deep_symbolize_keys
+
+        expect(parsed_response[:itemDetails]).to match_array(valid_item_details + invalid_item_details)
+        expect(parsed_response[:total]).to eq(125.0)
+        expect(parsed_response[:cartIsValid]).to be(false)
+      end
+    end
+
+    context 'with only valid items' do
+      before do
+        allow(CartsService::CheckoutItemDetails).to receive(:call).and_return(valid_item_details)
+        allow(CartsService::CalculateCartTotal).to receive(:call).and_return(125.0)
+      end
+
+      it 'returns a valid cart when all items are valid' do
+        post :cart_item_details, params: { items: valid_items }
+
+        expect(response).to have_http_status(:ok)
+        parsed_response = JSON.parse(response.body).deep_symbolize_keys
+
+        expect(parsed_response[:itemDetails]).to match_array(valid_item_details)
+        expect(parsed_response[:total]).to eq(125.0)
+        expect(parsed_response[:cartIsValid]).to be(true)
+      end
+    end
+
+    context 'with invalid parameters' do
+      it 'raises a parameter missing error' do
+        expect do
+          post(:cart_item_details, params: {})
+        end.to raise_error(ActionController::ParameterMissing)
+      end
+    end
+  end
+
   describe 'POST #validate_cart' do
     let(:cart_items) do
       [
