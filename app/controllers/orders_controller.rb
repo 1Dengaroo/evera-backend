@@ -1,33 +1,22 @@
 # frozen_string_literal: true
 
 class OrdersController < ApplicationController
-  before_action :authenticate_user!, only: [:index]
-  before_action :authenticate_admin!, only: %i[admin_index update]
+  include UserStatus
+
+  before_action :authenticate_user_status!, only: [:index]
+  before_action :authenticate_admin_status!, only: %i[admin_index update]
 
   def create
     permitted_items = params.require(:items).map { |item| item.permit(:id, :quantity, :size).to_h }
+    result = OrdersService::CreateCheckoutSession.new(user: current_user, items: permitted_items).call
 
-    unless CartsService::ValidateCart.call(permitted_items)[:valid]
-      render json: { error: 'Invalid cart' }, status: :bad_request
-      return
+    if result[:error]
+      render json: { error: result[:error] }, status: result[:status]
+    else
+      render json: { session_id: result[:session_id] }
     end
-
-    begin
-      session = OrdersService::StripePayment.new(email: current_user&.email, items: permitted_items).create_checkout_session
-      order = OrdersService::CreateOrder.call(
-        checkout_session_id: session.id,
-        subtotal: CartsService::CalculateCartTotal.call(permitted_items),
-        items: permitted_items
-      )
-
-      order.update!(user: current_user) if current_user
-
-      render json: { session_id: session.id }
-    rescue Stripe::StripeError => e
-      render json: { error: e.message }, status: :bad_request
-    rescue ActiveRecord::RecordNotFound => e
-      render json: { error: "Product not found: #{e.message}" }, status: :not_found
-    end
+  rescue OrdersService::InvalidCartError => e
+    render json: { error: e.message }, status: :bad_request
   end
 
   def index
@@ -35,6 +24,13 @@ class OrdersController < ApplicationController
       .includes(order_items: :product, delivery: :address)
       .order(created_at: :desc)
     render json: @orders.as_json(orders_json_options)
+  end
+
+  def update
+    @order = OrdersService::UpdateOrder.call(order_id: params[:id], order_params: order_update_params)
+    render json: @order.as_json(orders_json_options)
+  rescue ActiveRecord::RecordInvalid => e
+    render json: { error: e.record.errors.full_messages.to_sentence }, status: :unprocessable_entity
   end
 
   def track_order
@@ -47,13 +43,6 @@ class OrdersController < ApplicationController
   def admin_index
     @orders = OrdersService::FilterOrders.call(params)
     render json: @orders.as_json(orders_json_options)
-  end
-
-  def update
-    @order = OrdersService::UpdateOrder.call(order_id: params[:id], order_params: order_update_params)
-    render json: @order.as_json(orders_json_options)
-  rescue ActiveRecord::RecordInvalid => e
-    render json: { error: e.record.errors.full_messages.to_sentence }, status: :unprocessable_entity
   end
 
   def success
@@ -89,10 +78,6 @@ class OrdersController < ApplicationController
         }
       }
     }
-  end
-
-  def authenticate_admin!
-    render json: { error: 'Unauthorized access' }, status: :forbidden unless !current_user.nil? && current_user.admin?
   end
 
   def order_update_params

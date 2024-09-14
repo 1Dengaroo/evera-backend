@@ -69,9 +69,10 @@ RSpec.describe ProductsController, type: :controller do
     end
 
     context 'when the product does not exist' do
-      it 'returns null' do
-        get :show, params: { id: 'invalid_id' }
-        expect(response.body).to eq('null')
+      it 'returns a not found status' do
+        get :show, params: { id: 'nonexistent_id' }
+        expect(response).to have_http_status(:not_found)
+        expect(JSON.parse(response.body)['error']).to eq('Product not found')
       end
     end
   end

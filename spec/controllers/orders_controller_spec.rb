@@ -19,107 +19,35 @@ RSpec.describe OrdersController, type: :controller do
         { 'id': '2', 'quantity' => '1' }
       ]
     end
-    let(:permitted_items) do
-      items.map(&:with_indifferent_access)
-    end
-    let(:subtotal) { 2000 }
-    let(:checkout_session_id) { 'cs_1GqIC8XnYozEGLjpCz7iRjz8' }
-    let(:checkout_session) { double('Stripe::Checkout::Session', id: checkout_session_id) } # rubocop:disable RSpec/VerifiedDoubles
-    let(:order) { instance_double(Order, id: 123, update!: true) }
+    let(:permitted_items) { items.map(&:with_indifferent_access) }
     let(:user) { create(:user) }
+    let(:service_result) { { session_id: 'cs_1GqIC8XnYozEGLjpCz7iRjz8' } }
 
     context 'when the request is successful and the user is logged in' do
       before do
         sign_in user
-        allow(CartsService::CalculateCartTotal).to receive(:call).with(permitted_items).and_return(subtotal)
-        allow(CartsService::ValidateCart).to receive(:call).with(permitted_items).and_return({ valid: true })
-        allow(OrdersService::CreateOrder).to receive(:call).and_return(order)
-        stripe_payment_instance = instance_double(OrdersService::StripePayment)
-        allow(OrdersService::StripePayment).to receive(:new).with(items: permitted_items, email: user.email).and_return(stripe_payment_instance)
-        allow(stripe_payment_instance).to receive(:create_checkout_session).and_return(checkout_session)
+        allow(OrdersService::CreateCheckoutSession).to receive(:new).and_return(instance_double(OrdersService::CreateCheckoutSession, call: service_result))
       end
 
-      it 'calculates the subtotal amount in cents' do
+      it 'calls the CreateOrderService' do
         post :create, params: { items: }
 
-        expect(CartsService::CalculateCartTotal).to have_received(:call).with(permitted_items)
-      end
-
-      it 'creates a Stripe checkout session' do
-        post :create, params: { items: }
-
-        expect(OrdersService::StripePayment).to have_received(:new).with(items: permitted_items, email: user.email)
-        expect(OrdersService::StripePayment.new(items: permitted_items, email: user.email)).to have_received(:create_checkout_session)
-      end
-
-      it 'creates an order with the correct parameters' do
-        post :create, params: { items: }
-
-        expect(OrdersService::CreateOrder).to have_received(:call).with(
-          checkout_session_id:,
-          subtotal:,
-          items: permitted_items
-        )
+        expect(OrdersService::CreateCheckoutSession).to have_received(:new).with(user:, items: permitted_items)
       end
 
       it 'returns the session ID in the response' do
         post :create, params: { items: }
 
         expect(response).to have_http_status(:ok)
-        expect(JSON.parse(response.body)).to eq({ 'session_id' => checkout_session_id })
-      end
-    end
-
-    context 'when the request is successful and the user is not logged in' do
-      before do
-        sign_out user
-        allow(CartsService::CalculateCartTotal).to receive(:call).with(permitted_items).and_return(subtotal)
-        allow(CartsService::ValidateCart).to receive(:call).with(permitted_items).and_return({ valid: true })
-        stripe_payment_instance = instance_double(OrdersService::StripePayment)
-        allow(OrdersService::StripePayment).to receive(:new).with(items: permitted_items, email: nil).and_return(stripe_payment_instance)
-        allow(stripe_payment_instance).to receive(:create_checkout_session).and_return(checkout_session)
-        allow(OrdersService::CreateOrder).to receive(:call).and_return(order)
-      end
-
-      it 'calculates the subtotal amount in cents' do
-        post :create, params: { items: }
-
-        expect(CartsService::CalculateCartTotal).to have_received(:call).with(permitted_items)
-      end
-
-      it 'creates a Stripe checkout session' do
-        post :create, params: { items: }
-
-        expect(OrdersService::StripePayment).to have_received(:new).with(items: permitted_items, email: nil)
-        expect(OrdersService::StripePayment.new(items: permitted_items, email: nil)).to have_received(:create_checkout_session)
-      end
-
-      it 'creates an order with the correct parameters' do
-        post :create, params: { items: }
-
-        expect(OrdersService::CreateOrder).to have_received(:call).with(
-          checkout_session_id:,
-          subtotal:,
-          items: permitted_items
-        )
-      end
-
-      it 'returns the session ID in the response' do
-        post :create, params: { items: }
-
-        expect(response).to have_http_status(:ok)
-        expect(JSON.parse(response.body)).to eq({ 'session_id' => checkout_session_id })
+        expect(JSON.parse(response.body)).to eq({ 'session_id' => service_result[:session_id] })
       end
     end
 
     context 'when the cart is invalid' do
+      let(:service_result) { { error: 'Invalid cart', status: :bad_request } }
+
       before do
-        allow(CartsService::ValidateCart).to receive(:call).with(permitted_items).and_return({ valid: false })
-        allow(CartsService::CalculateCartTotal).to receive(:call).with(permitted_items).and_return(subtotal)
-        stripe_payment_instance = instance_double(OrdersService::StripePayment)
-        allow(OrdersService::StripePayment).to receive(:new).with(items: permitted_items, email: nil).and_return(stripe_payment_instance)
-        allow(stripe_payment_instance).to receive(:create_checkout_session).and_return(checkout_session)
-        allow(OrdersService::CreateOrder).to receive(:call).and_return(order)
+        allow(OrdersService::CreateCheckoutSession).to receive(:new).and_return(instance_double(OrdersService::CreateCheckoutSession, call: service_result))
       end
 
       it 'returns a bad request status' do
@@ -127,31 +55,6 @@ RSpec.describe OrdersController, type: :controller do
 
         expect(response).to have_http_status(:bad_request)
         expect(JSON.parse(response.body)).to eq({ 'error' => 'Invalid cart' })
-      end
-
-      it 'does not create an order' do
-        post :create, params: { items: }
-
-        expect(OrdersService::CreateOrder).not_to have_received(:call)
-      end
-
-      it 'does not create a Stripe checkout session' do
-        post :create, params: { items: }
-
-        expect(OrdersService::StripePayment).not_to have_received(:new)
-        expect(OrdersService::StripePayment.new(items: permitted_items, email: nil)).not_to have_received(:create_checkout_session)
-      end
-
-      it 'does not calculate the subtotal amount' do
-        post :create, params: { items: }
-
-        expect(CartsService::CalculateCartTotal).not_to have_received(:call)
-      end
-
-      it 'does not return a session ID in the response' do
-        post :create, params: { items: }
-
-        expect(JSON.parse(response.body)).not_to include('session_id')
       end
     end
   end

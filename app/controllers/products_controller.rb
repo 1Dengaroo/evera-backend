@@ -1,7 +1,10 @@
 # frozen_string_literal: true
 
 class ProductsController < ApplicationController
-  before_action :authenticate_admin!, only: %i[create edit update admin_index]
+  include UserStatus
+
+  before_action :authenticate_admin_status!, only: %i[create edit update admin_index]
+  before_action :set_product, only: %i[show edit update price_by_id similar_products]
 
   def index
     @products = ProductsService::UserFilterProducts.call(params)
@@ -9,7 +12,6 @@ class ProductsController < ApplicationController
   end
 
   def show
-    @product = Product.find_by(id: params[:id], active: true)
     render json: @product
   end
 
@@ -23,12 +25,10 @@ class ProductsController < ApplicationController
   end
 
   def edit
-    @product = Product.find_by!(id: params[:id])
     render json: @product
   end
 
   def update
-    @product = Product.find_by(id: params[:id])
     if @product.update(product_params)
       render json: @product
     else
@@ -42,11 +42,6 @@ class ProductsController < ApplicationController
   end
 
   def price_by_id
-    @product = Product.find_by(id: params[:id], active: true)
-    if @product.nil?
-      render json: { error: 'Product not found' }, status: :not_found
-      return
-    end
     render json: { price: @product.price }
   end
 
@@ -56,15 +51,15 @@ class ProductsController < ApplicationController
   end
 
   def similar_products
-    @product = Product.find_by(id: params[:id])
     @products = ProductsService::SimilarProducts.call(@product)
     render json: @products
   end
 
   private
 
-  def authenticate_admin!
-    render json: { error: 'Unauthorized' }, status: :unauthorized unless current_user&.admin?
+  def set_product
+    @product = Product.find_by(id: params[:id], active: true)
+    render json: { error: 'Product not found' }, status: :not_found if @product.nil?
   end
 
   def product_params
