@@ -90,6 +90,46 @@ class ProductsController < ApplicationController
     render json: @products
   end
 
+  def cart_item_details
+    items = params.require(:items).map { |item| item.permit(:id, :quantity, :size).to_h }
+
+    item_details = items.map do |item|
+      product = Product.find_by(id: item['id'], active: true)
+      if product.nil?
+        {
+          id: item['id'],
+          size: item['size'],
+          price: 0,
+          isValid: false,
+          validationMessage: 'Product not found.'
+        }
+      else
+        validation_result = CartsService::ValidateProduct.call(item)
+
+        {
+          id: item['id'],
+          size: item['size'],
+          price: product.price,
+          isValid: validation_result[:valid],
+          validationMessage: validation_result[:message]
+        }
+      end
+    end
+
+    total = item_details.sum do |detail|
+      quantity = items.find { |i| i['id'] == detail[:id] && i['size'] == detail[:size] }['quantity'].to_i
+      detail[:price].to_i * quantity
+    end
+
+    cart_is_valid = item_details.all? { |detail| detail[:isValid] }
+
+    render json: {
+      itemDetails: item_details,
+      total:,
+      cartIsValid: cart_is_valid
+    }
+  end
+
   private
 
   def authenticate_admin!

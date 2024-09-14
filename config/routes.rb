@@ -29,6 +29,8 @@ Rails.application.routes.draw do
     end
   end
 
+  post 'products/cart_item_details', to: 'products#cart_item_details'
+
   resources :orders, only: %i[index create update] do
     collection do
       get :admin_index

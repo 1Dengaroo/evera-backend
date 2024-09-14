@@ -32,8 +32,8 @@ class OrdersController < ApplicationController
 
   def index
     @orders = current_user.orders.where(paid: true)
-                      .includes(order_items: :product, delivery: :address)
-                      .order(created_at: :desc)
+      .includes(order_items: :product, delivery: :address)
+      .order(created_at: :desc)
     render json: @orders.as_json(orders_json_options)
   end
 
