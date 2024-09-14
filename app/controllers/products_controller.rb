@@ -13,55 +13,6 @@ class ProductsController < ApplicationController
     render json: @product
   end
 
-  def price_by_id
-    @product = Product.find_by(id: params[:id], active: true)
-    if @product.nil?
-      render json: { error: 'Product not found' }, status: :not_found
-      return
-    end
-    render json: { price: @product.price }
-  end
-
-  def cart_total
-    items = params.require(:items).map { |item| item.permit(:id, :quantity).to_h }
-    unless CartsService::ValidateCart.call(items)
-      render json: { error: 'Invalid cart' }, status: :bad_request
-      return
-    end
-
-    @total = CartsService::CalculateCartTotal.call(items)
-    render json: { total: @total }
-  end
-
-  def validate_cart
-    items = params.require(:items).map { |item| item.permit(:id, :quantity, :size).to_h }
-    result = CartsService::ValidateCart.call(items)
-
-    if result[:valid]
-      render json: { valid: true }
-    else
-      render json: { valid: false, message: result[:message] }, status: result[:status]
-    end
-  end
-
-  def validate_product
-    @item = params.require(:item).permit(:id, :quantity, :size).to_h
-    result = CartsService::ValidateProduct.call(@item)
-
-    render json: { valid: result[:valid], message: result[:message] }, status: result[:status]
-  end
-
-  def front_page_products
-    @products = Product.where(active: true).order(created_at: :desc).limit(4)
-    render json: @products
-  end
-
-  def similar_products
-    @product = Product.find_by(id: params[:id])
-    @products = ProductsService::SimilarProducts.call(@product)
-    render json: @products
-  end
-
   def create
     @product = Product.new(product_params)
     if @product.save
@@ -90,18 +41,24 @@ class ProductsController < ApplicationController
     render json: @products
   end
 
-  def cart_item_details
-    items = params.require(:items).map { |item| item.permit(:id, :quantity, :size).to_h }
+  def price_by_id
+    @product = Product.find_by(id: params[:id], active: true)
+    if @product.nil?
+      render json: { error: 'Product not found' }, status: :not_found
+      return
+    end
+    render json: { price: @product.price }
+  end
 
-    item_details = CartsService::CheckoutItemDetails.call(items)
-    total = CartsService::CalculateCartTotal.call(items)
-    cart_is_valid = item_details.all? { |detail| detail[:isValid] }
+  def front_page_products
+    @products = Product.where(active: true).order(created_at: :desc).limit(4)
+    render json: @products
+  end
 
-    render json: {
-      itemDetails: item_details,
-      total:,
-      cartIsValid: cart_is_valid
-    }
+  def similar_products
+    @product = Product.find_by(id: params[:id])
+    @products = ProductsService::SimilarProducts.call(@product)
+    render json: @products
   end
 
   private

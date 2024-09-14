@@ -21,15 +21,19 @@ Rails.application.routes.draw do
       get 'similar_products'
     end
     collection do
-      post 'cart_total'
-      post 'validate_cart'
-      post 'validate_product'
       get 'admin_index'
       get 'front_page_products'
     end
   end
 
-  post 'products/cart_item_details', to: 'products#cart_item_details'
+  resources :carts, only: [] do
+    collection do
+      post 'cart_total'
+      post 'validate_cart'
+      post 'validate_product'
+      post 'cart_item_details'
+    end
+  end
 
   resources :orders, only: %i[index create update] do
     collection do
