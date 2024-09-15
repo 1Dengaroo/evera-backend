@@ -6,7 +6,7 @@ module CartsService
       total = 0
       items.each do |item|
         product = Product.find_by(id: item['id'], active: true)
-        raise ActiveRecord::RecordNotFound, "Product not found: #{item}" unless product
+        next unless product
 
         total += product.price * item['quantity']
       end

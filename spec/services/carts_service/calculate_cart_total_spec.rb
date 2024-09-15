@@ -21,14 +21,15 @@ RSpec.describe CartsService::CalculateCartTotal do
     end
 
     context 'when a product is not found' do
-      it 'raises ActiveRecord::RecordNotFound' do
+      it 'skip the product and calculates the total with the other products' do
         items = [
-          { 'id' => 999, 'quantity' => 2 }
+          { 'id' => product_one.id, 'quantity' => 2 },
+          { 'id' => 999, 'quantity' => 3 }
         ]
 
-        expect do
-          described_class.call(items)
-        end.to raise_error(ActiveRecord::RecordNotFound)
+        total = described_class.call(items)
+
+        expect(total).to eq(20.00)
       end
     end
 
