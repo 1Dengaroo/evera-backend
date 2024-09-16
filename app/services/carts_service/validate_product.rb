@@ -9,7 +9,7 @@ module CartsService
       return { valid: false, status: :unprocessable_entity, message: 'Quantity must be greater than 0' } if item[:quantity].to_i <= 0
       return { valid: false, status: :unprocessable_entity, message: 'Quantity must be less than 10' } if item[:quantity].to_i >= 10
       return { valid: false, status: :unprocessable_entity, message: 'Product is no longer active' } unless product.active
-      return { valid: false, status: :unprocessable_entity, message: 'Product is not available in the selected size' } if product.sizes.exclude?(item[:size])
+      return { valid: false, status: :unprocessable_entity, message: 'Product is not available in the selected size' } if product.sizes.exclude?(item[:size]) && product.sizes.present?
 
       { valid: true, message: 'Product is valid' }
     end
