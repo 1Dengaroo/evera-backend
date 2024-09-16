@@ -4,7 +4,8 @@ class ProductsController < ApplicationController
   include UserStatus
 
   before_action :authenticate_admin_status!, only: %i[create edit update admin_index]
-  before_action :set_product, only: %i[show edit update price_by_id similar_products]
+  before_action :set_user_product, only: %i[show price_by_id similar_products]
+  before_action :set_admin_product, only: %i[edit update]
 
   def index
     @products = ProductsService::UserFilterProducts.call(params)
@@ -57,8 +58,13 @@ class ProductsController < ApplicationController
 
   private
 
-  def set_product
+  def set_user_product
     @product = Product.find_by(id: params[:id], active: true)
+    render json: { error: 'Product not found' }, status: :not_found if @product.nil?
+  end
+
+  def set_admin_product
+    @product = Product.find_by(id: params[:id])
     render json: { error: 'Product not found' }, status: :not_found if @product.nil?
   end
 
