@@ -5,7 +5,8 @@ require 'rails_helper'
 RSpec.describe OrdersService::StripePayment do
   let(:items) do
     [
-      { 'id' => 1, 'quantity' => 2, 'size' => 'M' }, { 'id' => 2, 'quantity' => 1 }
+      { 'id' => 1, 'quantity' => 2, 'size' => 'M' }, 
+      { 'id' => 2, 'quantity' => 1 }
     ]
   end
   let(:email) { 'example@email.com' }
