@@ -13,7 +13,7 @@ class OrdersController < ApplicationController
     if result[:error]
       render json: { error: result[:error] }, status: result[:status]
     else
-      render json: { session_id: result[:session_id] }
+      render json: { session_id: result[:session_id], session_url: result[:session_url] }
     end
   rescue OrdersService::InvalidCartError => e
     render json: { error: e.message }, status: :bad_request

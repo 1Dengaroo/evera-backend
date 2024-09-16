@@ -13,7 +13,7 @@ module OrdersService
       create_order
       update_order_with_user
 
-      { session_id: @session.id }
+      { session_id: @session.id, session_url: @session.url }
     rescue Stripe::StripeError => e
       { error: e.message, status: :bad_request }
     rescue ActiveRecord::RecordNotFound => e

@@ -21,7 +21,7 @@ RSpec.describe OrdersController, type: :controller do
     end
     let(:permitted_items) { items.map(&:with_indifferent_access) }
     let(:user) { create(:user) }
-    let(:service_result) { { session_id: 'cs_1GqIC8XnYozEGLjpCz7iRjz8' } }
+    let(:service_result) { { session_id: 'cs_1GqIC8XnYozEGLjpCz7iRjz8', session_url: 'https://checkout.everafashion.com/cs_1GqIC8XnYozEGLjpCz7iRjz8' } }
 
     context 'when the request is successful and the user is logged in' do
       before do
@@ -35,11 +35,11 @@ RSpec.describe OrdersController, type: :controller do
         expect(OrdersService::CreateCheckoutSession).to have_received(:new).with(user:, items: permitted_items)
       end
 
-      it 'returns the session ID in the response' do
+      it 'returns the session Id and session Url in the response' do
         post :create, params: { items: }
 
         expect(response).to have_http_status(:ok)
-        expect(JSON.parse(response.body)).to eq({ 'session_id' => service_result[:session_id] })
+        expect(JSON.parse(response.body)).to eq({ 'session_id' => service_result[:session_id], 'session_url' => service_result[:session_url] })
       end
     end
 

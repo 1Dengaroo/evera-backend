@@ -14,7 +14,8 @@ RSpec.describe OrdersService::CreateCheckoutSession, type: :service do
   let(:user) { create(:user) }
   let(:subtotal) { 2000 }
   let(:checkout_session_id) { 'cs_1GqIC8XnYozEGLjpCz7iRjz8' }
-  let(:checkout_session) { double('Stripe::Checkout::Session', id: checkout_session_id) } # rubocop:disable RSpec/VerifiedDoubles
+  let(:checkout_session_url) { "https://checkout.everafashion.com/#{checkout_session_id}" }
+  let(:checkout_session) { double('Stripe::Checkout::Session', id: checkout_session_id, url: checkout_session_url) } # rubocop:disable RSpec/VerifiedDoubles
   let(:order) { instance_double(Order, id: 123, update!: true) }
 
   context 'when the cart is valid' do
