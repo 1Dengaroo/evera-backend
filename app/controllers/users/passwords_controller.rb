@@ -12,6 +12,7 @@ class Users::PasswordsController < Devise::PasswordsController
     end
 
     if user.valid_password?(params[:current_password])
+      Rails.logger.debug(params)
       if user.update!(password_params)
         render json: { message: 'Password has been reset successfully.' }, status: :ok
       else
@@ -47,5 +48,9 @@ class Users::PasswordsController < Devise::PasswordsController
 
   def reset_password_params
     params.require(:user).permit(:reset_password_token, :password, :password_confirmation)
+  end
+
+  def password_params
+    params.require(:user).permit(:password, :password_confirmation)
   end
 end
