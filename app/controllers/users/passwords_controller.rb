@@ -3,6 +3,25 @@
 class Users::PasswordsController < Devise::PasswordsController
   respond_to :json
 
+  def update_password
+    user = current_user
+
+    if user.nil?
+      render json: { error: 'You need to sign in or sign up before continuing.' }, status: :unauthorized
+      return
+    end
+
+    if user.valid_password?(params[:current_password])
+      if user.update!(password_params)
+        render json: { message: 'Password has been reset successfully.' }, status: :ok
+      else
+        render json: { errors: user.errors.full_messages }, status: :unprocessable_entity
+      end
+    else
+      render json: { error: 'Current password is incorrect' }, status: :unauthorized
+    end
+  end
+
   def create
     user = User.find_by(email: params[:email])
 

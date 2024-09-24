@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2024_09_10_164814) do
+ActiveRecord::Schema[7.2].define(version: 2024_09_23_213630) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -68,6 +68,14 @@ ActiveRecord::Schema[7.2].define(version: 2024_09_10_164814) do
     t.index ["user_id"], name: "index_orders_on_user_id"
   end
 
+  create_table "phone_numbers", force: :cascade do |t|
+    t.string "number"
+    t.bigint "user_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id"], name: "index_phone_numbers_on_user_id"
+  end
+
   create_table "products", id: :string, force: :cascade do |t|
     t.string "name", null: false
     t.text "description"
@@ -103,4 +111,5 @@ ActiveRecord::Schema[7.2].define(version: 2024_09_10_164814) do
   add_foreign_key "order_items", "orders"
   add_foreign_key "order_items", "products"
   add_foreign_key "orders", "users"
+  add_foreign_key "phone_numbers", "users"
 end

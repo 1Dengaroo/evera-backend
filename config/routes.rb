@@ -9,10 +9,14 @@ Rails.application.routes.draw do
                      controllers: {
                        sessions: 'users/sessions',
                        registrations: 'users/registrations',
-                       passwords: 'users/passwords'
+                       passwords: 'users/passwords',
+                       profiles: 'users/profiles'
                      }
   devise_scope :user do
     get 'users/check_admin', to: 'users/sessions#check_admin'
+    patch 'users/update_password', to: 'users/passwords#update_password'
+    patch 'users/update_profile', to: 'users/profiles#update'
+    get 'users/profile', to: 'users/profiles#show'
   end
 
   resources :products, only: %i[index show create edit update] do

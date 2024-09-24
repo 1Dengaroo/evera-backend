@@ -166,6 +166,10 @@ GEM
       ast (~> 2.4.1)
       racc
     pg (1.5.7)
+    phony (2.20.13)
+    phony_rails (0.15.0)
+      activesupport (>= 3.0)
+      phony (>= 2.18.12)
     psych (5.1.2)
       stringio
     puma (6.4.2)
@@ -336,6 +340,7 @@ DEPENDENCIES
   factory_bot_rails
   jsonapi-serializer
   pg (~> 1.1)
+  phony_rails
   puma (>= 5.0)
   rack-attack (~> 6.6, >= 6.6.1)
   rack-cors
@@ -351,6 +356,9 @@ DEPENDENCIES
   sinatra
   stripe
   tzinfo-data
+
+RUBY VERSION
+   ruby 3.1.2p20
 
 BUNDLED WITH
    2.3.7
