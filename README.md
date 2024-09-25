@@ -1,24 +1,69 @@
-# README
+# Evera Backend
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+## Dependencies
 
-Things you may want to cover:
+- Ruby: ruby-3.1.2
+- Postgres (`brew/apt-get install postgresql` or [Postgres.app](https://postgresapp.com/))
+- Redis (`brew/apt-get install redis`)
 
-* Ruby version
+## Environment variables
 
-* System dependencies
+Generate the required `.env` file by running the following:
 
-* Configuration
+```
+cp .sample.env .env
+```
 
-* Database creation
+You should also copy the `database.yml` from the example file:
 
-* Database initialization
+```
+cp config/database.yml.example config/database.yml
+```
 
-* How to run the test suite
+## Regular Setup
 
-* Services (job queues, cache servers, search engines, etc.)
+Make sure you're using the correct Ruby version (check the Gemfile for that)
 
-* Deployment instructions
+Install dependencies using bundler:
 
-* ...
+```
+bundle install
+```
+
+Setup your database:
+
+```
+bundle exec rails db:create db:migrate
+```
+
+Currently we don't use Redis cache but in the future toggle Redis cache on:
+
+```
+rails dev:cache
+```
+
+Facing issues installing `pg` during the bundle (change `~/.zshrc` to your terminal configuration path):
+
+```
+brew/apt-get install libpq
+
+echo 'export PATH="/opt/homebrew/opt/libpq/bin:$PATH"' >> ~/.zshrc
+```
+
+## Spec
+
+```
+bundle exec rspec
+```
+
+## Lint
+
+```
+bundle exec rubocop
+```
+
+## Seed
+
+```
+bundle exec rails db:seed
+```

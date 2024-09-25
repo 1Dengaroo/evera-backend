@@ -9,6 +9,8 @@ default: &default
   username: <%= ENV['DATABASE_USERNAME'] %>
   password: <%= ENV['DATABASE_PASSWORD'] %>
   <% end %>
+  
+  port: <%= ENV['DATABASE_PORT'] %>
 
 development:
   <<: *default
@@ -19,7 +21,4 @@ test:
   database: portal_api_test
 
 production:
-  <<: *default
-  database: portal_api_production
-  username: portal_api
-  password: <%= ENV["PORTAL_API_DATABASE_PASSWORD"] %>
+  url: <%= ENV['DATABASE_URL'] %>
