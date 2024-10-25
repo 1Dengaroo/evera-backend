@@ -165,7 +165,7 @@ GEM
     parser (3.3.4.2)
       ast (~> 2.4.1)
       racc
-    pg (1.5.7)
+    pg (1.5.9)
     phony (2.20.13)
     phony_rails (0.15.0)
       activesupport (>= 3.0)
@@ -339,7 +339,7 @@ DEPENDENCIES
   dotenv-rails (~> 2.8)
   factory_bot_rails
   jsonapi-serializer
-  pg (~> 1.1)
+  pg (~> 1.5)
   phony_rails
   puma (>= 5.0)
   rack-attack (~> 6.6, >= 6.6.1)
